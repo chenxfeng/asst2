@@ -65,10 +65,12 @@ class TaskSystemParallelThreadPoolSpinning: public ITaskSystem {
     private:
         std::vector<std::thread> threads;
         std::mutex mutex;
+        std::mutex counterLock;
         struct Tuple {
             IRunnable* runnable;
             int id;
             int num_total_tasks;
+            int * counter;
         };
         std::queue<Tuple> workQueue;
         void func();
