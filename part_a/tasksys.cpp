@@ -36,10 +36,6 @@ void TaskSystemSerial::sync() {
     return;
 }
 
-
-#include <thread>
-#include <mutex>
-
 /*
  * ================================================================
  * Parallel Task System Implementation
@@ -80,9 +76,8 @@ void TaskSystemParallelSpawn::run(IRunnable* runnable, int num_total_tasks) {
     // method in Part A.  The implementation provided below runs all
     // tasks sequentially on the calling thread.
     //
-    std::thread threads[this->numOfThread];
     for (int i = 0; i < this->numOfThread; ++i) {
-        threads[i] = std::thread(func, runnable, num_total_tasks);
+        threads.push_back(std::thread(func, runnable, num_total_tasks));
     }
     for (int i = 0; i < this->numOfThread; ++i) {
         threads[i].join();

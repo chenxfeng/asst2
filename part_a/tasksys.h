@@ -19,6 +19,8 @@ class TaskSystemSerial: public ITaskSystem {
         void sync();
 };
 
+#include <thread>
+#include <mutex>
 /*
  * TaskSystemParallelSpawn: This class is the student's implementation of a
  * parallel task execution engine that spawns threads in every run()
@@ -36,6 +38,7 @@ class TaskSystemParallelSpawn: public ITaskSystem {
         void sync();
     private:
         int numOfThread;
+        std::vector<std::thread> threads;
         std::mutex mutex;
         int taskId = 0;
         void func(IRunnable* runnable, int num_total_tasks);
