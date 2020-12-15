@@ -61,9 +61,9 @@ TaskSystemParallelSpawn::~TaskSystemParallelSpawn() {}
 void TaskSystemParallelSpawn::func(IRunnable* runnable, int num_total_tasks) {
     int id;
     while (true) {
-        mutex.lock();
-        id = taskId++;
-        mutex.unlock();
+        // mutex.lock();
+        id = taskId++;///taskId is now an atomic variable
+        // mutex.unlock();
         if (id >= num_total_tasks) return ;
         runnable->runTask(id, num_total_tasks);
     }
