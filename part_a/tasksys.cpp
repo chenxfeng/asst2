@@ -58,7 +58,7 @@ TaskSystemParallelSpawn::TaskSystemParallelSpawn(int num_threads): ITaskSystem(n
 
 TaskSystemParallelSpawn::~TaskSystemParallelSpawn() {}
 
-void TaskSystemParallelSpawn::func(IRunnable* runnable, int num_total_tasks) {
+static void TaskSystemParallelSpawn::func(IRunnable* runnable, int num_total_tasks) {
     int id;
     while (true) {
         mutex.lock();
