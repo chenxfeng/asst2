@@ -70,8 +70,8 @@ void TaskSystemParallelSpawn::run(IRunnable* runnable, int num_total_tasks) {
     // method in Part A.  The implementation provided below runs all
     // tasks sequentially on the calling thread.
     //
-    std::mutex mutex;
-    int taskId = 0;
+    static std::mutex mutex;
+    static int taskId = 0;
     std::thread threads[this->numOfThread];
 
     auto func = [=]() {
