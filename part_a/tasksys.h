@@ -38,7 +38,7 @@ class TaskSystemParallelSpawn: public ITaskSystem {
         int numOfThread;
         std::mutex mutex;
         int taskId = 0;
-        void func();
+        void func(IRunnable* runnable, int num_total_tasks);
 };
 
 /*
