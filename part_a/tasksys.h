@@ -72,6 +72,12 @@ class TaskSystemParallelThreadPoolSpinning: public ITaskSystem {
             int id;
             int num_total_tasks;
             int * counter;
+            Tuple(IRunnable* ir, int i, int n, int * c) {
+                runnable = ir;
+                id = i;
+                num_total_tasks = n;
+                counter = c;
+            }
         };
         std::queue<Tuple> workQueue;
         void func();
