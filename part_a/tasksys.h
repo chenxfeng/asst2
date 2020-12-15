@@ -36,6 +36,9 @@ class TaskSystemParallelSpawn: public ITaskSystem {
         void sync();
     private:
         int numOfThread;
+        std::mutex mutex;
+        int taskId = 0;
+        void func();
 };
 
 /*

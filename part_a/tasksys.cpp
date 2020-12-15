@@ -62,28 +62,25 @@ TaskSystemParallelSpawn::TaskSystemParallelSpawn(int num_threads): ITaskSystem(n
 
 TaskSystemParallelSpawn::~TaskSystemParallelSpawn() {}
 
-void TaskSystemParallelSpawn::run(IRunnable* runnable, int num_total_tasks) {
+void TaskSystemParallelSpawn::func() {
+    int id;
+    while (true) {
+        mutex.lock();
+        id = taskId++;
+        mutex.unlock();
+        if (id >= num_total_tasks) return ;
+        runnable->runTask(id, num_total_tasks);
+    }
+}
 
+void TaskSystemParallelSpawn::run(IRunnable* runnable, int num_total_tasks) {
 
     //
     // TODO: CS149 students will modify the implementation of this
     // method in Part A.  The implementation provided below runs all
     // tasks sequentially on the calling thread.
     //
-    static std::mutex mutex;
-    static int taskId = 0;
     std::thread threads[this->numOfThread];
-
-    auto func = [=]() {
-        int id;
-        while (true) {
-            mutex.lock();
-            id = taskId++;
-            mutex.unlock();
-            if (id >= num_total_tasks) return ;
-            runnable->runTask(id, num_total_tasks);
-        }
-    };
     for (int i = 0; i < this->numOfThread; ++i) {
         threads[i] = std::thread(func);
     }
