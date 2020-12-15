@@ -58,7 +58,7 @@ TaskSystemParallelSpawn::TaskSystemParallelSpawn(int num_threads): ITaskSystem(n
 
 TaskSystemParallelSpawn::~TaskSystemParallelSpawn() {}
 
-static void TaskSystemParallelSpawn::func(IRunnable* runnable, int num_total_tasks) {
+void TaskSystemParallelSpawn::func(IRunnable* runnable, int num_total_tasks) {
     int id;
     while (true) {
         mutex.lock();
@@ -77,7 +77,7 @@ void TaskSystemParallelSpawn::run(IRunnable* runnable, int num_total_tasks) {
     // tasks sequentially on the calling thread.
     //
     for (int i = 0; i < this->numOfThread; ++i) {
-        threads.push_back(std::thread(func, runnable, num_total_tasks));
+        threads.push_back(std::thread(&TaskSystemParallelSpawn::func, this, runnable, num_total_tasks));
     }
     for (int i = 0; i < this->numOfThread; ++i) {
         threads[i].join();

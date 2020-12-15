@@ -41,7 +41,7 @@ class TaskSystemParallelSpawn: public ITaskSystem {
         std::vector<std::thread> threads;
         std::mutex mutex;
         int taskId = 0;
-        static void func(IRunnable* runnable, int num_total_tasks);
+        void func(IRunnable* runnable, int num_total_tasks);
 };
 
 /*
