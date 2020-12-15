@@ -104,6 +104,23 @@ const char* TaskSystemParallelThreadPoolSpinning::name() {
     return "Parallel + Thread Pool + Spin";
 }
 
+void TaskSystemParallelThreadPoolSpinning::func() {
+    Tuple aJob;
+    while (true) {
+        mutex.lock();
+        if (workQueue.size()) {
+            aJob = workQueue.front();
+            workQueue.pop();
+        } else {
+            aJob.id = -1;
+        }
+        mutex.unlock();
+
+        if (aJob.id == -1) continue;
+        aJob.runnable->runTask(aJob.id, aJob.num_total_tasks);
+    }
+}
+
 TaskSystemParallelThreadPoolSpinning::TaskSystemParallelThreadPoolSpinning(int num_threads): ITaskSystem(num_threads) {
     //
     // TODO: CS149 student implementations may decide to perform setup
@@ -111,21 +128,24 @@ TaskSystemParallelThreadPoolSpinning::TaskSystemParallelThreadPoolSpinning(int n
     // Implementations are free to add new class member variables
     // (requiring changes to tasksys.h).
     //
+    for (int i = 0; i < num_threads; ++i) {
+        threads.push_back(std::thread(&TaskSystemParallelThreadPoolSpinning::func, this));
+    }
 }
 
 TaskSystemParallelThreadPoolSpinning::~TaskSystemParallelThreadPoolSpinning() {}
 
 void TaskSystemParallelThreadPoolSpinning::run(IRunnable* runnable, int num_total_tasks) {
 
-
     //
     // TODO: CS149 students will modify the implementation of this
     // method in Part A.  The implementation provided below runs all
     // tasks sequentially on the calling thread.
     //
-
     for (int i = 0; i < num_total_tasks; i++) {
-        runnable->runTask(i, num_total_tasks);
+        mutex.lock();
+        workQueue.push(Tuple(runnable, i, num_total_tasks));
+        mutex.unlock();
     }
 }
 
