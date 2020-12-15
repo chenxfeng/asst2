@@ -47,6 +47,7 @@ class TaskSystemParallelSpawn: public ITaskSystem {
 };
 
 #include <queue>
+#include <mutex>
 /*
  * TaskSystemParallelThreadPoolSpinning: This class is the student's
  * implementation of a parallel task execution engine that uses a
