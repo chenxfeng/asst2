@@ -122,6 +122,7 @@ void TaskSystemParallelThreadPoolSpinning::func() {
         counterLock.lock();
         printf("counter %d \n", *(aJob.counter));
         *(aJob.counter) --;
+        printf("counter %d \n", *(aJob.counter));
         counterLock.unlock();
     }
 }
