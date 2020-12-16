@@ -136,6 +136,7 @@ class TaskSystemParallelThreadPoolSleeping: public ITaskSystem {
             }
         };
         std::mutex counterLock;
+        std::condition_variable counterCond;
         WorkQueue workQueue;
         void func();
 };

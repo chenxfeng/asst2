@@ -197,6 +197,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
 
         counterLock.lock();
         *(aJob.counter) -= 1;//-- operator isn't OK
+        if (*(aJob.counter) == 0) counterCond.notify_one();
         counterLock.unlock();
     }
 }
@@ -241,7 +242,9 @@ void TaskSystemParallelThreadPoolSleeping::run(IRunnable* runnable, int num_tota
         workQueue.push(Tuple(runnable, i, num_total_tasks, &counter));
     }
     while (true) {//busy wait
-        const std::lock_guard<std::mutex> lock(counterLock);
+        std::unique_lock<std::mutex> lock(counterLock);
+        if (counter != 0) 
+            counterCond.wait(lock);
         if (counter == 0) break;
     }
 }
