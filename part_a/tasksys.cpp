@@ -83,6 +83,7 @@ void TaskSystemParallelSpawn::run(IRunnable* runnable, int num_total_tasks) {
     for (int i = 0; i < this->numOfThread; ++i) {
         threads[i].join();
     }
+    printf("exit TaskSystemParallelSpawn::run\n");
 }
 
 TaskID TaskSystemParallelSpawn::runAsyncWithDeps(IRunnable* runnable, int num_total_tasks,
@@ -154,6 +155,7 @@ void TaskSystemParallelThreadPoolSpinning::run(IRunnable* runnable, int num_tota
     while (counter != 0) {
         continue;//busy wait
     }
+    printf("exit TaskSystemParallelThreadPoolSpinning::run\n");
 }
 
 TaskID TaskSystemParallelThreadPoolSpinning::runAsyncWithDeps(IRunnable* runnable, int num_total_tasks,
