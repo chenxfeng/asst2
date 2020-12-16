@@ -176,7 +176,7 @@ void TaskSystemParallelThreadPoolSpinning::run(IRunnable* runnable, int num_tota
         workQueue.push(Tuple(runnable, i, num_total_tasks, &counter));
         mutex.unlock();
     }
-    while (counter != 0) {
+    while (counter.load() != 0) {
         continue;//busy wait
     }
     // printf("exit TaskSystemParallelThreadPoolSpinning::run\n");
