@@ -54,7 +54,7 @@ TaskSystemParallelSpawn::TaskSystemParallelSpawn(int num_threads): ITaskSystem(n
     // (requiring changes to tasksys.h).
     //
     this->numOfThread = num_threads;
-    taskId.store(0);
+    // taskId.store(0);
 }
 
 TaskSystemParallelSpawn::~TaskSystemParallelSpawn() {}
