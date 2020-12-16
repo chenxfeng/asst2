@@ -208,10 +208,10 @@ void TaskSystemParallelThreadPoolSleeping::func() {
         if (aJob.id == -1) return ;
         aJob.runnable->runTask(aJob.id, aJob.num_total_tasks);
 
-        counterLock.lock();
+        aJob.counterLock->lock();
         *(aJob.counter) -= 1;//-- operator isn't OK
-        if (*(aJob.counter) == 0) counterCond.notify_one();
-        counterLock.unlock();
+        if (*(aJob.counter) == 0) aJob.counterCond->notify_one();
+        aJob.counterLock->unlock();
     }
 }
 
@@ -235,7 +235,7 @@ TaskSystemParallelThreadPoolSleeping::~TaskSystemParallelThreadPoolSleeping() {
     // (requiring changes to tasksys.h).
     //
     for (int i = 0; i < threads.size(); i++) {
-        workQueue.push(Tuple(NULL, -1, 0, NULL));
+        workQueue.push(Tuple(NULL, -1, 0, NULL, NULL, NULL));
     }
     for (int i = 0; i < threads.size(); ++i) {
         threads[i].join();
@@ -251,8 +251,11 @@ void TaskSystemParallelThreadPoolSleeping::run(IRunnable* runnable, int num_tota
     // tasks sequentially on the calling thread.
     //
     int counter = num_total_tasks;
+    std::mutex counterLock;
+    std::condition_variable counterCond;
     for (int i = 0; i < num_total_tasks; i++) {
-        workQueue.push(Tuple(runnable, i, num_total_tasks, &counter));
+        workQueue.push(Tuple(runnable, i, num_total_tasks, &counter, 
+            &counterLock, &counterCond));
     }
     while (true) {//busy wait
         // printf("test counter %d \n", counter);

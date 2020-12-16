@@ -106,12 +106,17 @@ class TaskSystemParallelThreadPoolSleeping: public ITaskSystem {
             int id;
             int num_total_tasks;
             int * counter;
+            std::mutex* counterLock;
+            std::condition_variable* counterCond;
             Tuple() {}
-            Tuple(IRunnable* ir, int i, int n, int * c) {
+            Tuple(IRunnable* ir, int i, int n, int * c, 
+                std::mutex* cLck, std::condition_variable* cCnd) {
                 runnable = ir;
                 id = i;
                 num_total_tasks = n;
                 counter = c;
+                counterLock = cLck;
+                counterCond = cCnd;
             }
         };
         struct WorkQueue {
@@ -133,8 +138,6 @@ class TaskSystemParallelThreadPoolSleeping: public ITaskSystem {
                 return t;
             }
         };
-        std::mutex counterLock;
-        std::condition_variable counterCond;
         WorkQueue workQueue;
         void func();
 };
