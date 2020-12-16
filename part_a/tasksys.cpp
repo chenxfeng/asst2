@@ -85,6 +85,7 @@ void TaskSystemParallelSpawn::run(IRunnable* runnable, int num_total_tasks) {
     for (int i = 0; i < this->numOfThread; ++i) {
         threads[i].join();
     }
+    threads.clear();
     printf("test C\n");
 }
 
