@@ -107,9 +107,9 @@ const char* TaskSystemParallelThreadPoolSpinning::name() {
 void TaskSystemParallelThreadPoolSpinning::func() {
     Tuple aJob;
     while (true) {
-        printf("workquque: %d\n", workQueue.size());
+        // printf("workquque: %d\n", workQueue.size());
         mutex.lock();
-        if (workQueue.size()) {
+        if (workQueue.size()) { 
             aJob = workQueue.front();
             workQueue.pop();
         } else {
