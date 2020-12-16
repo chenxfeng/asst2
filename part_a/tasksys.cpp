@@ -122,9 +122,8 @@ void TaskSystemParallelThreadPoolSpinning::func() {
         if (aJob.id == -1) continue;
         aJob.runnable->runTask(aJob.id, aJob.num_total_tasks);
         counterLock.lock();
-        printf("counter %d \n", *(aJob.counter));
-        *(aJob.counter) -= 1;
-        printf("counter %d \n", *(aJob.counter));
+        *(aJob.counter) -= 1;//-- operator isn't OK
+        // printf("counter %d \n", *(aJob.counter));
         counterLock.unlock();
     }
 }
@@ -167,7 +166,7 @@ void TaskSystemParallelThreadPoolSpinning::run(IRunnable* runnable, int num_tota
         if (counter == 0) break;
         // printf("test counter %d \n", counter);
     }
-    printf("exit TaskSystemParallelThreadPoolSpinning::run\n");
+    // printf("exit TaskSystemParallelThreadPoolSpinning::run\n");
 }
 
 TaskID TaskSystemParallelThreadPoolSpinning::runAsyncWithDeps(IRunnable* runnable, int num_total_tasks,
