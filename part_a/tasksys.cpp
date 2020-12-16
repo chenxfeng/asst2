@@ -85,8 +85,12 @@ void TaskSystemParallelSpawn::run(IRunnable* runnable, int num_total_tasks) {
     // }
     // threads.clear();
     for (int i = 0; i < num_total_tasks; i++) {
-        std::thread(&TaskSystemParallelSpawn::func, this, runnable, i, num_total_tasks);
+        threads.push_back(std::thread(&TaskSystemParallelSpawn::func, this, runnable, i, num_total_tasks));
     }
+    for (int i = 0; i < threads.size(); ++i) {
+        threads[i].join();
+    }
+    threads.clear();
 }
 
 TaskID TaskSystemParallelSpawn::runAsyncWithDeps(IRunnable* runnable, int num_total_tasks,
