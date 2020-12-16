@@ -116,7 +116,7 @@ class TaskSystemParallelThreadPoolSleeping: public ITaskSystem {
                 counter = c;
             }
         };
-        class WorkQueue {
+        struct WorkQueue {
             std::mutex WQmutex;
             std::condition_variable WQcond;
             std::queue<Tuple> workQueue;

@@ -188,7 +188,7 @@ const char* TaskSystemParallelThreadPoolSleeping::name() {
     return "Parallel + Thread Pool + Sleep";
 }
 
-void TaskSystemParallelThreadPoolSpinning::func() {
+void TaskSystemParallelThreadPoolSleeping::func() {
     Tuple aJob;
     while (true) {
         aJob = workQueue.pop();
