@@ -63,18 +63,19 @@ class TaskSystemParallelThreadPoolSpinning: public ITaskSystem {
     private:
         std::vector<std::thread> threads;
         std::mutex mutex;
-        std::mutex counterLock;
         struct Tuple {
             IRunnable* runnable;
             int id;
             int num_total_tasks;
             int * counter;
+            std::mutex& counterLock;
             Tuple() {}
-            Tuple(IRunnable* ir, int i, int n, int * c) {
+            Tuple(IRunnable* ir, int i, int n, int * c, std::mutex& cLck) {
                 runnable = ir;
                 id = i;
                 num_total_tasks = n;
                 counter = c;
+                counterLock = cLck;
             }
         };
         std::atomic<bool> exitFlag;
