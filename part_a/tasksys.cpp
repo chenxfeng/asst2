@@ -107,7 +107,7 @@ const char* TaskSystemParallelThreadPoolSpinning::name() {
 void TaskSystemParallelThreadPoolSpinning::func() {
     Tuple aJob;
     while (true) {
-        if (exit) return ;
+        if (exitFlag) return ;
         // printf("workquque: %d\n", workQueue.size());
 
         mutex.lock();
@@ -163,13 +163,10 @@ void TaskSystemParallelThreadPoolSpinning::run(IRunnable* runnable, int num_tota
         mutex.unlock();
     }
     while (true) {//busy wait
-        // const std::lock_guard<std::mutex> lock(counterLock);
-        counterLock.lock();
+        const std::lock_guard<std::mutex> lock(counterLock);
         if (counter == 0) break;
-        printf("test counter %d \n", counter);
-        counterLock.unlock();
+        // printf("test counter %d \n", counter);
     }
-    counterLock.unlock();
     printf("exit TaskSystemParallelThreadPoolSpinning::run\n");
 }
 
