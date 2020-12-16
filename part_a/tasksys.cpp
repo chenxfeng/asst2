@@ -139,10 +139,7 @@ void TaskSystemParallelThreadPoolSpinning::func() {
 
         if (aJob.id == -1) continue;
         aJob.runnable->runTask(aJob.id, aJob.num_total_tasks);
-        aJob.counterLock->lock();
-        *(aJob.counter) -= 1;//-- operator isn't OK
-        // printf("counter %d \n", *(aJob.counter));
-        aJob.counterLock->unlock();
+        *(aJob.counter) --;
     }
 }
 
@@ -173,17 +170,14 @@ void TaskSystemParallelThreadPoolSpinning::run(IRunnable* runnable, int num_tota
     // method in Part A.  The implementation provided below runs all
     // tasks sequentially on the calling thread.
     //
-    int counter = num_total_tasks;
-    std::mutex counterLock;
+    std::atomic<int> counter(num_total_tasks);
     for (int i = 0; i < num_total_tasks; i++) {
         mutex.lock();
-        workQueue.push(Tuple(runnable, i, num_total_tasks, &counter, &counterLock));
+        workQueue.push(Tuple(runnable, i, num_total_tasks, &counter));
         mutex.unlock();
     }
-    while (true) {//busy wait
-        const std::lock_guard<std::mutex> lock(counterLock);
-        if (counter == 0) break;
-        // printf("test counter %d \n", counter);
+    while (counter != 0) {
+        continue;//busy wait
     }
     // printf("exit TaskSystemParallelThreadPoolSpinning::run\n");
 }
