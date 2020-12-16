@@ -80,6 +80,7 @@ class TaskSystemParallelThreadPoolSpinning: public ITaskSystem {
                 counter = c;
             }
         };
+        std::atomic<bool> exitFlag;
         std::queue<Tuple> workQueue;
         void func();
 };

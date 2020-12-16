@@ -135,14 +135,14 @@ TaskSystemParallelThreadPoolSpinning::TaskSystemParallelThreadPoolSpinning(int n
     // Implementations are free to add new class member variables
     // (requiring changes to tasksys.h).
     //
-    exit = false;
+    exitFlag = false;
     for (int i = 0; i < num_threads; ++i) {
         threads.push_back(std::thread(&TaskSystemParallelThreadPoolSpinning::func, this));
     }
 }
 
 TaskSystemParallelThreadPoolSpinning::~TaskSystemParallelThreadPoolSpinning() {
-    exit.store(true);
+    exitFlag.store(true);
     for (int i = 0; i < threads.size(); ++i) {
         threads[i].join();
     }
