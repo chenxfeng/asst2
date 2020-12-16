@@ -39,8 +39,7 @@ class TaskSystemParallelSpawn: public ITaskSystem {
     private:
         int numOfThread;
         std::vector<std::thread> threads;
-        std::atomic<int> taskNum;
-        void func(IRunnable* runnable, int id, int num_total_tasks);
+        void func(IRunnable* runnable, int num_total_tasks, std::atomic<int>* taskId);
 };
 
 #include <queue>

@@ -59,9 +59,14 @@ TaskSystemParallelSpawn::TaskSystemParallelSpawn(int num_threads): ITaskSystem(n
 
 TaskSystemParallelSpawn::~TaskSystemParallelSpawn() {}
 
-void TaskSystemParallelSpawn::func(IRunnable* runnable, int id, int num_total_tasks) {
-    runnable->runTask(id, num_total_tasks);
-    taskNum --;
+void TaskSystemParallelSpawn::func(IRunnable* runnable, 
+    int num_total_tasks, std::atomic<int>* taskId) {
+    int id;
+    while (true) {
+        id = (*taskId) ++;
+        if (id >= num_total_tasks) return ;
+        runnable->runTask(id, num_total_tasks);
+    }
 }
 
 void TaskSystemParallelSpawn::run(IRunnable* runnable, int num_total_tasks) {
@@ -71,13 +76,15 @@ void TaskSystemParallelSpawn::run(IRunnable* runnable, int num_total_tasks) {
     // method in Part A.  The implementation provided below runs all
     // tasks sequentially on the calling thread.
     //
-    // for (int i = 0; i < this->numOfThread; ++i) {
-    //     threads.push_back(std::thread(&TaskSystemParallelSpawn::func, this, runnable, num_total_tasks));
-    // }
-    // for (int i = 0; i < this->numOfThread; ++i) {
-    //     threads[i].join();
-    // }
-    // threads.clear();
+    std::atomic<int> taskId(0);
+    for (int i = 0; i < this->numOfThread; ++i) {
+        threads.push_back(std::thread(&TaskSystemParallelSpawn::func, this, runnable, 
+            num_total_tasks, &taskId));
+    }
+    for (int i = 0; i < this->numOfThread; ++i) {
+        threads[i].join();
+    }
+    threads.clear();
     // for (int i = 0; i < num_total_tasks; i++) {
     //     threads.push_back(std::thread(&TaskSystemParallelSpawn::func, this, runnable, i, num_total_tasks));
     // }
@@ -85,16 +92,16 @@ void TaskSystemParallelSpawn::run(IRunnable* runnable, int num_total_tasks) {
     //     threads[i].join();
     // }
     // threads.clear();
-    int taskId = 0;
-    while (true && taskId < num_total_tasks) {
-        if (taskNum >= numOfThread) continue;///guarantee max numOfThread
-        taskNum ++;
-        threads.push_back(std::thread(&TaskSystemParallelSpawn::func, this, runnable, taskId++, num_total_tasks));
-    }
-    for (int i = 0; i < threads.size(); ++i) {
-        threads[i].join();
-    }
-    threads.clear();
+    // int taskId = 0;
+    // while (true && taskId < num_total_tasks) {
+    //     if (taskNum >= numOfThread) continue;///guarantee max numOfThread
+    //     taskNum ++;
+    //     threads.push_back(std::thread(&TaskSystemParallelSpawn::func, this, runnable, taskId++, num_total_tasks));
+    // }
+    // for (int i = 0; i < threads.size(); ++i) {
+    //     threads[i].join();
+    // }
+    // threads.clear();
 }
 
 TaskID TaskSystemParallelSpawn::runAsyncWithDeps(IRunnable* runnable, int num_total_tasks,
