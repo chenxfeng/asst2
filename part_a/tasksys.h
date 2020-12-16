@@ -68,9 +68,9 @@ class TaskSystemParallelThreadPoolSpinning: public ITaskSystem {
             int id;
             int num_total_tasks;
             int * counter;
-            std::mutex& counterLock;
+            std::mutex* counterLock;
             Tuple() {}
-            Tuple(IRunnable* ir, int i, int n, int * c, std::mutex& cLck) {
+            Tuple(IRunnable* ir, int i, int n, int * c, std::mutex* cLck) {
                 runnable = ir;
                 id = i;
                 num_total_tasks = n;
