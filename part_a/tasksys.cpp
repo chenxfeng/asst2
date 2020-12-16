@@ -98,8 +98,8 @@ void TaskSystemParallelSpawn::run(IRunnable* runnable, int num_total_tasks) {
         taskNum ++;
         threads.push_back(std::thread(&TaskSystemParallelSpawn::func, this, runnable, taskId++, num_total_tasks));
     }
-    for (auto thread : threads) {
-        thread.join();
+    for (int i = 0; i < threads.size(); ++i) {
+        threads[i].join();
     }
     threads.clear();
 }
