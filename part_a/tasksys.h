@@ -125,7 +125,7 @@ class TaskSystemParallelThreadPoolSleeping: public ITaskSystem {
             std::queue<Tuple> workQueue;
             void push(const Tuple& t) {
                 const std::lock_guard<std::mutex> lock(WQmutex);
-                workQueue.push(Tuple(t.runnable, t.id, t.num_total_tasks, t.counter
+                workQueue.push(Tuple(t.runnable, t.id, t.num_total_tasks, t.counter, 
                     t.counterLock, t.counterCond));
                 WQcond.notify_one();
             }
