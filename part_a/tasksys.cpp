@@ -120,7 +120,6 @@ void TaskSystemParallelThreadPoolSpinning::func() {
         if (aJob.id == -1) continue;
         aJob.runnable->runTask(aJob.id, aJob.num_total_tasks);
         counterLock.lock();
-        printf("counter %d \n", *(aJob.counter));
         *(aJob.counter) -= 1;
         printf("counter %d \n", *(aJob.counter));
         counterLock.unlock();
@@ -159,6 +158,7 @@ void TaskSystemParallelThreadPoolSpinning::run(IRunnable* runnable, int num_tota
         mutex.unlock();
     }
     while (counter != 0) {
+        printf("test counter %d \n", counter);
         continue;//busy wait
     }
     printf("exit TaskSystemParallelThreadPoolSpinning::run\n");
