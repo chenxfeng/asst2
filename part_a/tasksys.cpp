@@ -192,7 +192,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
     Tuple aJob;
     while (true) {
         aJob = workQueue.pop();
-        if (aJob.id = -1) return ;
+        if (aJob.id == -1) return ;
         aJob.runnable->runTask(aJob.id, aJob.num_total_tasks);
 
         counterLock.lock();
