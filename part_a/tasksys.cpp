@@ -161,9 +161,10 @@ void TaskSystemParallelThreadPoolSpinning::run(IRunnable* runnable, int num_tota
         workQueue.push(Tuple(runnable, i, num_total_tasks, &counter));
         mutex.unlock();
     }
-    while (counter != 0) {
+    while (true) {//busy wait
+        std::lock_guard<std::mutex> lock(counterLock);
+        if (counter == 0) break;
         // printf("test counter %d \n", counter);
-        continue;//busy wait
     }
     printf("exit TaskSystemParallelThreadPoolSpinning::run\n");
 }
