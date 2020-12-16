@@ -139,8 +139,8 @@ void TaskSystemParallelThreadPoolSpinning::func() {
 
         if (aJob.id == -1) continue;
         aJob.runnable->runTask(aJob.id, aJob.num_total_tasks);
-        *(aJob.counter) -= 1;
-        printf("counter %d \n", aJob.counter->load());
+        *(aJob.counter) -= 1;//-- operator isn't OK
+        // printf("counter %d \n", aJob.counter->load());
     }
 }
 
