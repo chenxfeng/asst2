@@ -121,7 +121,7 @@ void TaskSystemParallelThreadPoolSpinning::func() {
         aJob.runnable->runTask(aJob.id, aJob.num_total_tasks);
         counterLock.lock();
         *(aJob.counter) --;
-        printf("%d \n", aJob.counter);
+        printf("%d \n", *(aJob.counter));
         counterLock.unlock();
     }
 }
