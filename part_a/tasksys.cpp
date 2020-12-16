@@ -54,20 +54,14 @@ TaskSystemParallelSpawn::TaskSystemParallelSpawn(int num_threads): ITaskSystem(n
     // (requiring changes to tasksys.h).
     //
     this->numOfThread = num_threads;
-    taskId.store(0);
+    taskNum.store(0);
 }
 
 TaskSystemParallelSpawn::~TaskSystemParallelSpawn() {}
 
-void TaskSystemParallelSpawn::func(IRunnable* runnable, int num_total_tasks) {
-    int id;
-    while (true) {
-        // mutex.lock();
-        id = taskId++;///taskId is now an atomic variable
-        // mutex.unlock();
-        if (id >= num_total_tasks) return ;
-        runnable->runTask(id, num_total_tasks);
-    }
+void TaskSystemParallelSpawn::func(IRunnable* runnable, int id, int num_total_tasks) {
+    runnable->runTask(id, num_total_tasks);
+    taskNum --;
 }
 
 void TaskSystemParallelSpawn::run(IRunnable* runnable, int num_total_tasks) {
@@ -85,7 +79,9 @@ void TaskSystemParallelSpawn::run(IRunnable* runnable, int num_total_tasks) {
     // }
     // threads.clear();
     for (int i = 0; i < num_total_tasks; i++) {
-        runnable->runTask(i, num_total_tasks);
+        while (taskNum == numOfThread) continue;
+        std::thread(&TaskSystemParallelSpawn::func, this, runnable, i, num_total_tasks);
+        taskNum ++;
     }
 }
 
