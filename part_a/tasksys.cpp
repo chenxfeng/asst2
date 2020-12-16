@@ -107,7 +107,9 @@ const char* TaskSystemParallelThreadPoolSpinning::name() {
 void TaskSystemParallelThreadPoolSpinning::func() {
     Tuple aJob;
     while (true) {
+        if (exit) return ;
         // printf("workquque: %d\n", workQueue.size());
+
         mutex.lock();
         if (workQueue.size()) { 
             aJob = workQueue.front();
@@ -133,12 +135,14 @@ TaskSystemParallelThreadPoolSpinning::TaskSystemParallelThreadPoolSpinning(int n
     // Implementations are free to add new class member variables
     // (requiring changes to tasksys.h).
     //
+    exit = false;
     for (int i = 0; i < num_threads; ++i) {
         threads.push_back(std::thread(&TaskSystemParallelThreadPoolSpinning::func, this));
     }
 }
 
 TaskSystemParallelThreadPoolSpinning::~TaskSystemParallelThreadPoolSpinning() {
+    exit.store(true);
     for (int i = 0; i < threads.size(); ++i) {
         threads[i].join();
     }
@@ -158,7 +162,7 @@ void TaskSystemParallelThreadPoolSpinning::run(IRunnable* runnable, int num_tota
         mutex.unlock();
     }
     while (counter != 0) {
-        printf("test counter %d \n", counter);
+        // printf("test counter %d \n", counter);
         continue;//busy wait
     }
     printf("exit TaskSystemParallelThreadPoolSpinning::run\n");
