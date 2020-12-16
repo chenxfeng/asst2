@@ -163,10 +163,13 @@ void TaskSystemParallelThreadPoolSpinning::run(IRunnable* runnable, int num_tota
         mutex.unlock();
     }
     while (true) {//busy wait
-        const std::lock_guard<std::mutex> lock(counterLock);
+        // const std::lock_guard<std::mutex> lock(counterLock);
+        counterLock.lock();
         if (counter == 0) break;
         printf("test counter %d \n", counter);
+        counterLock.unlock();
     }
+    counterLock.unlock();
     printf("exit TaskSystemParallelThreadPoolSpinning::run\n");
 }
 
