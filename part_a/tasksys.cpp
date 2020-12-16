@@ -108,12 +108,16 @@ void TaskSystemParallelThreadPoolSpinning::func() {
     Tuple aJob;
     while (true) {
         printf("workquque: %d\n", workQueue.size());
+        mutex.lock();
         if (workQueue.size()) {
-            const std::lock_guard<std::mutex> lock(mutex);
             aJob = workQueue.front();
             workQueue.pop();
-        } else continue;
+        } else {
+            aJob.id = -1;
+        }
+        mutex.unlock();
 
+        if (aJob.id == -1) continue;
         aJob.runnable->runTask(aJob.id, aJob.num_total_tasks);
         counterLock.lock();
         *(aJob.counter) --;
@@ -154,7 +158,6 @@ void TaskSystemParallelThreadPoolSpinning::run(IRunnable* runnable, int num_tota
         mutex.unlock();
     }
     while (counter != 0) {
-        // printf("%d\n", counter);
         continue;//busy wait
     }
     printf("exit TaskSystemParallelThreadPoolSpinning::run\n");
