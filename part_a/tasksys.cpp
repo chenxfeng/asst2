@@ -242,7 +242,7 @@ void TaskSystemParallelThreadPoolSleeping::run(IRunnable* runnable, int num_tota
         workQueue.push(Tuple(runnable, i, num_total_tasks, &counter));
     }
     while (true) {//busy wait
-        printf("test counter %d \n", counter);
+        // printf("test counter %d \n", counter);
         std::unique_lock<std::mutex> lock(counterLock);
         if (counter != 0) 
             counterCond.wait(lock);
