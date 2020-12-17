@@ -161,6 +161,8 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                 }
                 try {
                     if (isReady) {
+                        assert(taskQueue[aJob.taskID].at(i) < taskHandl.size());
+                        assert(taskQueue[aJob.taskID].at(i) < taskWorks.size());
                         for (int j = 0; j < taskHandl[taskQueue[aJob.taskID].at(i)].second; j++) {
                             workQueue.push(Tuple(taskQueue[aJob.taskID].at(i),
                                 taskHandl[taskQueue[aJob.taskID].at(i)].first, 
@@ -270,7 +272,7 @@ void TaskSystemParallelThreadPoolSleeping::sync() {
         }
         // printf("task %d of %d tasks finish\n", i, taskWorks.size());
     }
-    // for (int i = 0; i < taskWorks.size(); ++i) delete taskWorks[i];
+    for (int i = 0; i < taskWorks.size(); ++i) delete taskWorks[i];
     taskQueue.clear();
     taskDeps.clear();
     taskHandl.clear();
