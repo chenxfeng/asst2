@@ -126,6 +126,18 @@ const char* TaskSystemParallelThreadPoolSleeping::name() {
     return "Parallel + Thread Pool + Sleep";
 }
 
+void TaskSystemParallelThreadPoolSleeping::func() {
+    Tuple aJob;
+    while (true) {
+        aJob = workQueue.pop();
+        if (aJob.id == -1) return ;
+        aJob.runnable->runTask(aJob.id, aJob.num_total_tasks);
+
+        *(aJob.counter) -= 1;//-- operator isn't OK
+        if (aJob.counter->load() == 0) aJob.counterCond->notify_one();
+    }
+}
+
 TaskSystemParallelThreadPoolSleeping::TaskSystemParallelThreadPoolSleeping(int num_threads): ITaskSystem(num_threads) {
     //
     // TODO: CS149 student implementations may decide to perform setup
@@ -133,6 +145,9 @@ TaskSystemParallelThreadPoolSleeping::TaskSystemParallelThreadPoolSleeping(int n
     // Implementations are free to add new class member variables
     // (requiring changes to tasksys.h).
     //
+    for (int i = 0; i < num_threads; ++i) {
+        threads.push_back(std::thread(&TaskSystemParallelThreadPoolSleeping::func, this));
+    }
 }
 
 TaskSystemParallelThreadPoolSleeping::~TaskSystemParallelThreadPoolSleeping() {
@@ -142,6 +157,12 @@ TaskSystemParallelThreadPoolSleeping::~TaskSystemParallelThreadPoolSleeping() {
     // Implementations are free to add new class member variables
     // (requiring changes to tasksys.h).
     //
+    for (int i = 0; i < threads.size(); i++) {
+        workQueue.push(Tuple(NULL, -1, 0, NULL, NULL));
+    }
+    for (int i = 0; i < threads.size(); ++i) {
+        threads[i].join();
+    }
 }
 
 void TaskSystemParallelThreadPoolSleeping::run(IRunnable* runnable, int num_total_tasks) {
@@ -152,9 +173,19 @@ void TaskSystemParallelThreadPoolSleeping::run(IRunnable* runnable, int num_tota
     // method in Parts A and B.  The implementation provided below runs all
     // tasks sequentially on the calling thread.
     //
-
+    std::atomic<int> counter(num_total_tasks);
+    std::mutex counterLock;
+    std::condition_variable counterCond;
     for (int i = 0; i < num_total_tasks; i++) {
-        runnable->runTask(i, num_total_tasks);
+        workQueue.push(Tuple(runnable, i, num_total_tasks, 
+            &counter, &counterCond));
+    }
+    while (true) {//busy wait
+        // printf("test counter %d \n", counter);
+        std::unique_lock<std::mutex> lock(counterLock);
+        if (counter.load() != 0) 
+            counterCond.wait(lock);
+        if (counter.load() == 0) break;
     }
 }
 
