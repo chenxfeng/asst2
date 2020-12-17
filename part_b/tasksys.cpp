@@ -125,7 +125,7 @@ void TaskSystemParallelThreadPoolSpinning::sync() {
 const char* TaskSystemParallelThreadPoolSleeping::name() {
     return "Parallel + Thread Pool + Sleep";
 }
-
+#include <exception>
 void TaskSystemParallelThreadPoolSleeping::func() {
     Tuple aJob;
     while (true) {
@@ -139,6 +139,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
             aJob.counterCond->notify_one();
             ///if run async With dependency
             if (taskQueue.size()) {
+                try {
                 ///start the succeed task
                 for (int i = 0; i < taskQueue[aJob.taskID].size(); ++i) {
                     ///if all dependent task has finished
@@ -157,6 +158,9 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                                 taskWorks[taskQueue[aJob.taskID].at(i)], &counterCond));
                         }
                     }
+                }
+                } catch(std::exception& e) {
+                    printf("exception catched: %s\n", e.what());
                 }
             }
         }
