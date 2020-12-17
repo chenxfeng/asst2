@@ -151,9 +151,10 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                     }
                     if (isReady) {
                         for (int j = 0; j < taskHandl[taskQueue[aJob.taskID].at(i)].second; j++) {
-                            workQueue.push(Tuple(taskHandl[taskQueue[aJob.taskID].at(i)].first, 
+                            workQueue.push(Tuple(taskQueue[aJob.taskID].at(i),
+                                taskHandl[taskQueue[aJob.taskID].at(i)].first, 
                                 j, taskHandl[taskQueue[aJob.taskID].at(i)].second, 
-                                &(taskWorks[taskQueue[aJob.taskID].at(i)]), taskQueue[aJob.taskID].at(i)));
+                                &(taskWorks[taskQueue[aJob.taskID].at(i)]), &counterCond));
                         }
                     }
                 }
