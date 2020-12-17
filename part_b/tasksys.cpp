@@ -161,6 +161,8 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                 }
                 } catch(std::exception& e) {
                     printf("exception catched: %s\n", e.what());
+                } catch (auto e) {
+                    printf("auto exception\n");
                 }
             }
         }
