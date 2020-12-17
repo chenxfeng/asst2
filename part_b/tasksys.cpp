@@ -241,6 +241,7 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
     //
     // TODO: CS149 students will implement this method in Part B.
     //
+    try {
     taskQueue.push_back(std::vector<TaskID>());
     taskDeps.push_back(deps);
     taskHandl.push_back(std::pair<IRunnable*, int>(runnable, num_total_tasks));
@@ -256,6 +257,11 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
             taskQueue[deps.at(i)].push_back(taskQueue.size()-1);
         }
     }
+    } catch(std::exception& e) {
+        printf("run exception catched: %d\n", e.what());
+    } catch(...) {
+        printf("run ... exception\n");
+    }
     return taskQueue.size()-1;
 }
 
@@ -264,6 +270,7 @@ void TaskSystemParallelThreadPoolSleeping::sync() {
     //
     // TODO: CS149 students will modify the implementation of this method in Part B.
     //
+    try {
     std::mutex counterLock;
     for (int i = 0; i < taskWorks.size(); ++i) {
         while (true) {
@@ -281,5 +288,10 @@ void TaskSystemParallelThreadPoolSleeping::sync() {
     taskDeps.clear();
     taskHandl.clear();
     taskWorks.clear();
+    } catch(std::exception& e) {
+        printf("sync exception catched: %d\n", e.what());
+    } catch(...) {
+        printf("sync ... exception\n");
+    }
     return;
 }
