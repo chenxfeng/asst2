@@ -245,9 +245,9 @@ void TaskSystemParallelThreadPoolSleeping::sync() {
     std::mutex counterLock;
     for (int i = 0; i < taskWorks.size(); ++i) {
         while (true) {
-            std::unique_lock<std::mutex> lck(counterLock);
-            if (taskWorks.at(i)->load() != 0) 
-                counterCond.wait(lck);
+            // std::unique_lock<std::mutex> lck(counterLock);
+            // if (taskWorks.at(i)->load() != 0) 
+            //     counterCond.wait(lck);
             if (taskWorks.at(i)->load() == 0) 
                 break;
         }
