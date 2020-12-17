@@ -139,9 +139,9 @@ void TaskSystemParallelThreadPoolSleeping::func() {
             aJob.counterCond->notify_one();
             ///if run async With dependency
             if (taskQueue.size()) {
-                try {
                 ///start the succeed task
                 for (int i = 0; i < taskQueue[aJob.taskID].size(); ++i) {
+                try {
                     ///if all dependent task has finished
                     bool isReady = true;
                     for (int j = 0; j < taskDeps[taskQueue[aJob.taskID].at(i)].size(); ++j) {
@@ -150,6 +150,12 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                             break;
                         }
                     }
+                } catch(std::exception& e) {
+                    printf("1 exception catched: %s\n", e.what());
+                } catch (...) {
+                    printf("1 ... exception\n");
+                }
+                try {
                     if (isReady) {
                         for (int j = 0; j < taskHandl[taskQueue[aJob.taskID].at(i)].second; j++) {
                             workQueue.push(Tuple(taskQueue[aJob.taskID].at(i),
@@ -158,11 +164,11 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                                 taskWorks[taskQueue[aJob.taskID].at(i)], &counterCond));
                         }
                     }
-                }
                 } catch(std::exception& e) {
-                    printf("exception catched: %s\n", e.what());
+                    printf("2 exception catched: %s\n", e.what());
                 } catch (...) {
-                    printf("... exception\n");
+                    printf("2 ... exception\n");
+                }
                 }
             }
         }
