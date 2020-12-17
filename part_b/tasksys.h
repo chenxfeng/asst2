@@ -80,15 +80,15 @@ class TaskSystemParallelThreadPoolSleeping: public ITaskSystem {
             int id;
             int num_total_tasks;
             std::atomic<int>* counter;
-            std::condition_variable* counterCond;
+            TaskID taskID;
             Tuple() {}
             Tuple(IRunnable* ir, int i, int n, 
-                std::atomic<int>* c, std::condition_variable* cCnd) {
+                std::atomic<int>* c, TaskID tid) {
                 runnable = ir;
                 id = i;
                 num_total_tasks = n;
                 counter = c;
-                counterCond = cCnd;
+                taskID = tid;
             }
         };
         struct WorkQueue {

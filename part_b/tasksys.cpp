@@ -136,22 +136,22 @@ void TaskSystemParallelThreadPoolSleeping::func() {
         *(aJob.counter) -= 1;//-- operator isn't OK
         if (aJob.counter->load() == 0) {
             ///notice sync if waiting
-            aJob.counterCond->notify_one();
+            counterCond.notify_one();
             ///start the succeed task
-            for (int i = 0; i < taskQueue.size(); ++i) {
+            for (int i = 0; i < taskQueue[aJob.taskID].size(); ++i) {
                 ///if all dependent task has finished
                 bool isReady = true;
-                for (int j = 0; j < taskDeps[taskQueue.at(i)].size(); ++j) {
-                    if (taskWorks[taskDeps[taskQueue.at(i)].at(j)].load() != 0) {
+                for (int j = 0; j < taskDeps[taskQueue[aJob.taskID].at(i)].size(); ++j) {
+                    if (taskWorks[taskDeps[taskQueue[aJob.taskID].at(i)].at(j)].load() != 0) {
                         isReady = false;
                         break;
                     }
                 }
                 if (isReady) {
-                    for (int j = 0; j < taskHandl[taskQueue.at(i)].second; j++) {
-                        workQueue.push(Tuple(taskHandl[taskQueue.at(i)].first, 
-                            j, taskHandl[taskQueue.at(i)].second, 
-                            &(taskWorks[taskQueue.at(i)]), &counterCond));
+                    for (int j = 0; j < taskHandl[taskQueue[aJob.taskID].at(i)].second; j++) {
+                        workQueue.push(Tuple(taskHandl[taskQueue[aJob.taskID].at(i)].first, 
+                            j, taskHandl[taskQueue[aJob.taskID].at(i)].second, 
+                            &(taskWorks[taskQueue[aJob.taskID].at(i)]), taskQueue[aJob.taskID].at(i)));
                     }
                 }
             }
@@ -179,7 +179,7 @@ TaskSystemParallelThreadPoolSleeping::~TaskSystemParallelThreadPoolSleeping() {
     // (requiring changes to tasksys.h).
     //
     for (int i = 0; i < threads.size(); i++) {
-        workQueue.push(Tuple(NULL, -1, 0, NULL, NULL));
+        workQueue.push(Tuple(NULL, -1, 0, NULL, 0));
     }
     for (int i = 0; i < threads.size(); ++i) {
         threads[i].join();
@@ -223,7 +223,7 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
     if (deps.empty()) {
         for (int i = 0; i < num_total_tasks; i++) {
             workQueue.push(Tuple(runnable, i, num_total_tasks, 
-                &(taskWorks.back()), &counterCond));
+                &(taskWorks.back()), taskQueue.size()-1));
         }
     } else {
         for (int i = 0; i < deps.size(); ++i) {
