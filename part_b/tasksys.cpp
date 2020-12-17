@@ -134,7 +134,28 @@ void TaskSystemParallelThreadPoolSleeping::func() {
         aJob.runnable->runTask(aJob.id, aJob.num_total_tasks);
 
         *(aJob.counter) -= 1;//-- operator isn't OK
-        if (aJob.counter->load() == 0) aJob.counterCond->notify_one();
+        if (aJob.counter->load() == 0) {
+            ///notice sync if waiting
+            aJob.counterCond->notify_one();
+            ///start the succeed task
+            for (int i = 0; i < taskQueue.size(); ++i) {
+                ///if all dependent task has finished
+                bool isReady = true;
+                for (int j = 0; j < taskDeps[taskQueue.at(i)].size(); ++j) {
+                    if (taskWorks[taskDeps[taskQueue.at(i)].at(j)].load() != 0) {
+                        isReady = false;
+                        break;
+                    }
+                }
+                if (isReady) {
+                    for (int j = 0; j < taskHandl[taskQueue.at(i)].second; j++) {
+                        workQueue.push(Tuple(taskHandl[taskQueue.at(i)].first, 
+                            j, taskHandl[taskQueue.at(i)].second, 
+                            &(taskWorks[taskQueue.at(i)]), &counterCond));
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -167,7 +188,6 @@ TaskSystemParallelThreadPoolSleeping::~TaskSystemParallelThreadPoolSleeping() {
 
 void TaskSystemParallelThreadPoolSleeping::run(IRunnable* runnable, int num_total_tasks) {
 
-
     //
     // TODO: CS149 students will modify the implementation of this
     // method in Parts A and B.  The implementation provided below runs all
@@ -192,16 +212,25 @@ void TaskSystemParallelThreadPoolSleeping::run(IRunnable* runnable, int num_tota
 TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnable, int num_total_tasks,
                                                     const std::vector<TaskID>& deps) {
 
-
     //
     // TODO: CS149 students will implement this method in Part B.
     //
-
-    for (int i = 0; i < num_total_tasks; i++) {
-        runnable->runTask(i, num_total_tasks);
+    taskQueue.push_back(std::vector<TaskID>());
+    taskDeps.push_back(deps);
+    taskHandl.push_back(std::pair<IRunnable*, int>(runnable, num_total_tasks));
+    taskWorks.push_back(std::atomic<int>(num_total_tasks));
+    ///task launch with no deps
+    if (deps.empty()) {
+        for (int i = 0; i < num_total_tasks; i++) {
+            workQueue.push(Tuple(runnable, i, num_total_tasks, 
+                &(taskWorks.back()), &counterCond));
+        }
+    } else {
+        for (int i = 0; i < deps.size(); ++i) {
+            taskQueue[deps.at(i)].push_back(taskQueue.size()-1);
+        }
     }
-
-    return 0;
+    return taskQueue.size()-1;
 }
 
 void TaskSystemParallelThreadPoolSleeping::sync() {
@@ -209,6 +238,19 @@ void TaskSystemParallelThreadPoolSleeping::sync() {
     //
     // TODO: CS149 students will modify the implementation of this method in Part B.
     //
-
+    std::mutex counterLock;
+    for (int i = 0; i < taskWorks.size(); ++i) {
+        while (true) {
+            std::unique_lock<std::mutex> lck(counterLock);
+            if (taskWorks.at(i).load() != 0) 
+                counterCond.wait(lck);
+            if (taskWorks.at(i).load() == 0) 
+                break;
+        }
+    }
+    taskQueue.clear();
+    taskDeps.clear();
+    taskHandl.clear();
+    taskWorks.clear();
     return;
 }
