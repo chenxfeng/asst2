@@ -136,22 +136,25 @@ void TaskSystemParallelThreadPoolSleeping::func() {
         *(aJob.counter) -= 1;//-- operator isn't OK
         if (aJob.counter->load() == 0) {
             ///notice sync if waiting
-            counterCond.notify_one();
-            ///start the succeed task
-            for (int i = 0; i < taskQueue[aJob.taskID].size(); ++i) {
-                ///if all dependent task has finished
-                bool isReady = true;
-                for (int j = 0; j < taskDeps[taskQueue[aJob.taskID].at(i)].size(); ++j) {
-                    if (taskWorks[taskDeps[taskQueue[aJob.taskID].at(i)].at(j)].load() != 0) {
-                        isReady = false;
-                        break;
+            aJob.counterCond->notify_one();
+            ///if run async With dependency
+            if (taskQueue.size()) {
+                ///start the succeed task
+                for (int i = 0; i < taskQueue[aJob.taskID].size(); ++i) {
+                    ///if all dependent task has finished
+                    bool isReady = true;
+                    for (int j = 0; j < taskDeps[taskQueue[aJob.taskID].at(i)].size(); ++j) {
+                        if (taskWorks[taskDeps[taskQueue[aJob.taskID].at(i)].at(j)].load() != 0) {
+                            isReady = false;
+                            break;
+                        }
                     }
-                }
-                if (isReady) {
-                    for (int j = 0; j < taskHandl[taskQueue[aJob.taskID].at(i)].second; j++) {
-                        workQueue.push(Tuple(taskHandl[taskQueue[aJob.taskID].at(i)].first, 
-                            j, taskHandl[taskQueue[aJob.taskID].at(i)].second, 
-                            &(taskWorks[taskQueue[aJob.taskID].at(i)]), taskQueue[aJob.taskID].at(i)));
+                    if (isReady) {
+                        for (int j = 0; j < taskHandl[taskQueue[aJob.taskID].at(i)].second; j++) {
+                            workQueue.push(Tuple(taskHandl[taskQueue[aJob.taskID].at(i)].first, 
+                                j, taskHandl[taskQueue[aJob.taskID].at(i)].second, 
+                                &(taskWorks[taskQueue[aJob.taskID].at(i)]), taskQueue[aJob.taskID].at(i)));
+                        }
                     }
                 }
             }
@@ -179,7 +182,7 @@ TaskSystemParallelThreadPoolSleeping::~TaskSystemParallelThreadPoolSleeping() {
     // (requiring changes to tasksys.h).
     //
     for (int i = 0; i < threads.size(); i++) {
-        workQueue.push(Tuple(NULL, -1, 0, NULL, 0));
+        workQueue.push(Tuple(0, NULL, -1, 0, NULL, NULL));
     }
     for (int i = 0; i < threads.size(); ++i) {
         threads[i].join();
@@ -197,7 +200,7 @@ void TaskSystemParallelThreadPoolSleeping::run(IRunnable* runnable, int num_tota
     std::mutex counterLock;
     std::condition_variable counterCond;
     for (int i = 0; i < num_total_tasks; i++) {
-        workQueue.push(Tuple(runnable, i, num_total_tasks, 
+        workQueue.push(Tuple(0, runnable, i, num_total_tasks, 
             &counter, &counterCond));
     }
     while (true) {//busy wait
@@ -222,8 +225,8 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
     ///task launch with no deps
     if (deps.empty()) {
         for (int i = 0; i < num_total_tasks; i++) {
-            workQueue.push(Tuple(runnable, i, num_total_tasks, 
-                &(taskWorks.back()), taskQueue.size()-1));
+            workQueue.push(Tuple(taskQueue.size()-1, runnable, i, 
+                num_total_tasks, &(taskWorks.back()), &counterCond));
         }
     } else {
         for (int i = 0; i < deps.size(); ++i) {

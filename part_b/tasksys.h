@@ -80,15 +80,17 @@ class TaskSystemParallelThreadPoolSleeping: public ITaskSystem {
             int id;
             int num_total_tasks;
             std::atomic<int>* counter;
+            std::condition_variable* counterCond;
             TaskID taskID;
             Tuple() {}
-            Tuple(IRunnable* ir, int i, int n, 
-                std::atomic<int>* c, TaskID tid) {
+            Tuple(TaskID tid, IRunnable* ir, int i, int n, 
+                std::atomic<int>* c, std::condition_variable* cCnd) {
+                taskID = tid;
                 runnable = ir;
                 id = i;
                 num_total_tasks = n;
                 counter = c;
-                taskID = tid;
+                counterCond = cCnd;
             }
         };
         struct WorkQueue {
@@ -97,7 +99,7 @@ class TaskSystemParallelThreadPoolSleeping: public ITaskSystem {
             std::queue<Tuple> workQueue;
             void push(const Tuple& t) {
                 const std::lock_guard<std::mutex> lock(WQmutex);
-                workQueue.push(Tuple(t.runnable, t.id, 
+                workQueue.push(Tuple(t.taskID, t.runnable, t.id, 
                     t.num_total_tasks, t.counter, t.counterCond));
                 WQcond.notify_one();
             }
