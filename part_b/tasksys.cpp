@@ -251,6 +251,7 @@ void TaskSystemParallelThreadPoolSleeping::sync() {
             if (taskWorks.at(i)->load() == 0) 
                 break;
         }
+        delete taskWorks[i];
     }
     taskQueue.clear();
     taskDeps.clear();
