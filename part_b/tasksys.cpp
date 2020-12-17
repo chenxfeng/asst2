@@ -144,7 +144,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                 for (int i = 0; i < taskQueue[aJob.taskID].size(); ++i) {
                     ///if all dependent task has finished
                     bool isReady = true;
-                try {
+                // try {
                     assert(aJob.taskID < taskQueue.size());
                     assert(i < taskQueue[aJob.taskID].size());
                     assert(taskQueue[aJob.taskID].at(i) < taskDeps.size());
@@ -155,11 +155,11 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                             break;
                         }
                     }
-                } catch(std::exception& e) {
-                    printf("1 exception catched: %s\n", e.what());
-                } catch (...) {
-                    printf("1 ... exception\n");
-                }
+                // } catch(std::exception& e) {
+                //     printf("1 exception catched: %s\n", e.what());
+                // } catch (...) {
+                //     printf("1 ... exception\n");
+                // }
                 // try {
                     if (isReady) {
                         assert(aJob.taskID < taskQueue.size());
