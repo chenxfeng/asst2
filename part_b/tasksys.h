@@ -53,6 +53,7 @@ class TaskSystemParallelThreadPoolSpinning: public ITaskSystem {
         void sync();
 };
 
+#include <queue>
 #include <thread>
 #include <mutex>
 #include <atomic>
