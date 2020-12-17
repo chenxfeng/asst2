@@ -222,7 +222,7 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
     taskQueue.push_back(std::vector<TaskID>());
     taskDeps.push_back(deps);
     taskHandl.push_back(std::pair<IRunnable*, int>(runnable, num_total_tasks));
-    taskWorks.push_back(&(std::atomic<int>(num_total_tasks)));
+    taskWorks.push_back(new std::atomic<int>(num_total_tasks));
     ///task launch with no deps
     if (deps.empty()) {
         for (int i = 0; i < num_total_tasks; i++) {
