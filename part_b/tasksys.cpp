@@ -144,7 +144,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                     ///if all dependent task has finished
                     bool isReady = true;
                     for (int j = 0; j < taskDeps[taskQueue[aJob.taskID].at(i)].size(); ++j) {
-                        if (taskWorks[taskDeps[taskQueue[aJob.taskID].at(i)].at(j)].load() != 0) {
+                        if (taskWorks[taskDeps[taskQueue[aJob.taskID].at(i)].at(j)]->load() != 0) {
                             isReady = false;
                             break;
                         }
@@ -154,7 +154,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                             workQueue.push(Tuple(taskQueue[aJob.taskID].at(i),
                                 taskHandl[taskQueue[aJob.taskID].at(i)].first, 
                                 j, taskHandl[taskQueue[aJob.taskID].at(i)].second, 
-                                &(taskWorks[taskQueue[aJob.taskID].at(i)]), &counterCond));
+                                taskWorks[taskQueue[aJob.taskID].at(i)], &counterCond));
                         }
                     }
                 }
@@ -222,12 +222,12 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
     taskQueue.push_back(std::vector<TaskID>());
     taskDeps.push_back(deps);
     taskHandl.push_back(std::pair<IRunnable*, int>(runnable, num_total_tasks));
-    taskWorks.push_back(std::atomic<int>(num_total_tasks));
+    taskWorks.push_back(&(std::atomic<int>(num_total_tasks)));
     ///task launch with no deps
     if (deps.empty()) {
         for (int i = 0; i < num_total_tasks; i++) {
             workQueue.push(Tuple(taskQueue.size()-1, runnable, i, 
-                num_total_tasks, &(taskWorks.back()), &counterCond));
+                num_total_tasks, taskWorks.back(), &counterCond));
         }
     } else {
         for (int i = 0; i < deps.size(); ++i) {
@@ -246,9 +246,9 @@ void TaskSystemParallelThreadPoolSleeping::sync() {
     for (int i = 0; i < taskWorks.size(); ++i) {
         while (true) {
             std::unique_lock<std::mutex> lck(counterLock);
-            if (taskWorks.at(i).load() != 0) 
+            if (taskWorks.at(i)->load() != 0) 
                 counterCond.wait(lck);
-            if (taskWorks.at(i).load() == 0) 
+            if (taskWorks.at(i)->load() == 0) 
                 break;
         }
     }
