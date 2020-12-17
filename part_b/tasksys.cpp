@@ -147,8 +147,8 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                 try {
                     assert(aJob.taskID < taskQueue.size());
                     assert(taskQueue[aJob.taskID].at(i) < taskDeps.size());
-                    assert(taskDeps[taskQueue[aJob.taskID].at(i)].at(j) < taskWorks.size());
                     for (int j = 0; j < taskDeps[taskQueue[aJob.taskID].at(i)].size(); ++j) {
+                        assert(taskDeps[taskQueue[aJob.taskID].at(i)].at(j) < taskWorks.size());
                         if (taskWorks[taskDeps[taskQueue[aJob.taskID].at(i)].at(j)]->load() != 0) {
                             isReady = false;
                             break;
