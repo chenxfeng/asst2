@@ -140,18 +140,19 @@ void TaskSystemParallelThreadPoolSleeping::func() {
             aJob.counterCond->notify_one();
             ///if run async With dependency
             if (taskQueue.size()) {
+                assert(aJob.taskID < taskQueue.size());
                 ///start the succeed task
                 for (int i = 0; i < taskQueue[aJob.taskID].size(); ++i) {
                     ///if all dependent task has finished
                     bool isReady = true;
                 try {
-                    assert(aJob.taskID < taskQueue.size());
-                    assert(i < taskQueue[aJob.taskID].size());
-                    assert(taskQueue[aJob.taskID].at(i) < taskDeps.size());
-                    for (int j = 0; j < taskDeps[taskQueue[aJob.taskID].at(i)].size(); ++j) {
-                        assert(j < taskDeps[taskQueue[aJob.taskID].at(i)].size());
-                        assert(taskDeps[taskQueue[aJob.taskID].at(i)].at(j) < taskWorks.size());
-                        if (taskWorks[taskDeps[taskQueue[aJob.taskID].at(i)].at(j)]->load() != 0) {
+                    // assert(aJob.taskID < taskQueue.size());
+                    // assert(i < taskQueue[aJob.taskID].size());
+                    // assert(taskQueue[aJob.taskID].at(i) < taskDeps.size());
+                    for (int j = 0; j < taskDeps.at(taskQueue[aJob.taskID][i]).size(); ++j) {
+                        // assert(j < taskDeps[taskQueue[aJob.taskID].at(i)].size());
+                        // assert(taskDeps[taskQueue[aJob.taskID].at(i)].at(j) < taskWorks.size());
+                        if (taskWorks.at(taskDeps.at(taskQueue[aJob.taskID][i]).at(j))->load() != 0) {
                             isReady = false;
                             break;
                         }
@@ -163,15 +164,15 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                 }
                 try {
                     if (isReady) {
-                        assert(aJob.taskID < taskQueue.size());
-                        assert(i < taskQueue[aJob.taskID].size());
-                        assert(taskQueue[aJob.taskID].at(i) < taskHandl.size());
-                        assert(taskQueue[aJob.taskID].at(i) < taskWorks.size());
-                        for (int j = 0; j < taskHandl[taskQueue[aJob.taskID].at(i)].second; j++) {
-                            workQueue.push(Tuple(taskQueue[aJob.taskID].at(i),
-                                taskHandl[taskQueue[aJob.taskID].at(i)].first, 
-                                j, taskHandl[taskQueue[aJob.taskID].at(i)].second, 
-                                taskWorks[taskQueue[aJob.taskID].at(i)], &counterCond));
+                        // assert(aJob.taskID < taskQueue.size());
+                        // assert(i < taskQueue[aJob.taskID].size());
+                        // assert(taskQueue[aJob.taskID].at(i) < taskHandl.size());
+                        // assert(taskQueue[aJob.taskID].at(i) < taskWorks.size());
+                        for (int j = 0; j < taskHandl.at(taskQueue[aJob.taskID][i]).second; j++) {
+                            workQueue.push(Tuple(taskQueue[aJob.taskID][i],
+                                taskHandl.at(taskQueue[aJob.taskID][i]).first, 
+                                j, taskHandl.at(taskQueue[aJob.taskID][i]).second, 
+                                taskWorks.at(taskQueue[aJob.taskID][i]), &counterCond));
                         }
                     }
                 } catch(std::exception& e) {
