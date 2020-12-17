@@ -160,7 +160,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                 } catch (...) {
                     printf("1 ... exception\n");
                 }
-                // try {
+                try {
                     if (isReady) {
                         assert(aJob.taskID < taskQueue.size());
                         assert(i < taskQueue[aJob.taskID].size());
@@ -173,11 +173,11 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                                 taskWorks[taskQueue[aJob.taskID].at(i)], &counterCond));
                         }
                     }
-                // } catch(std::exception& e) {
-                //     printf("2 exception catched: %s\n", e.what());
-                // } catch (...) {
-                //     printf("2 ... exception\n");
-                // }
+                } catch(std::exception& e) {
+                    printf("2 exception catched: %s\n", e.what());
+                } catch (...) {
+                    printf("2 ... exception\n");
+                }
                 }
             }
         }
