@@ -248,10 +248,11 @@ void TaskSystemParallelThreadPoolSleeping::sync() {
             // std::unique_lock<std::mutex> lck(counterLock);
             // if (taskWorks.at(i)->load() != 0) 
             //     counterCond.wait(lck);
+            ///must busy-waiting; or lock this loop code-block
             if (taskWorks.at(i)->load() == 0) 
                 break;
         }
-        printf("task %d of %d tasks finish\n", i, taskWorks.size());
+        // printf("task %d of %d tasks finish\n", i, taskWorks.size());
     }
     for (int i = 0; i < taskWorks.size(); ++i) delete taskWorks[i];
     taskQueue.clear();
