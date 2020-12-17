@@ -145,8 +145,8 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                     ///if all dependent task has finished
                     bool isReady = true;
                 try {
-                    assert(i < taskQueue[aJob.taskID].size());
                     assert(aJob.taskID < taskQueue.size());
+                    assert(i < taskQueue[aJob.taskID].size());
                     assert(taskQueue[aJob.taskID].at(i) < taskDeps.size());
                     for (int j = 0; j < taskDeps[taskQueue[aJob.taskID].at(i)].size(); ++j) {
                         assert(taskDeps[taskQueue[aJob.taskID].at(i)].at(j) < taskWorks.size());
@@ -160,10 +160,10 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                 } catch (...) {
                     printf("1 ... exception\n");
                 }
-                try {
+                // try {
                     if (isReady) {
-                        assert(i < taskQueue[aJob.taskID].size());
                         assert(aJob.taskID < taskQueue.size());
+                        assert(i < taskQueue[aJob.taskID].size());
                         assert(taskQueue[aJob.taskID].at(i) < taskHandl.size());
                         assert(taskQueue[aJob.taskID].at(i) < taskWorks.size());
                         for (int j = 0; j < taskHandl[taskQueue[aJob.taskID].at(i)].second; j++) {
@@ -173,11 +173,11 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                                 taskWorks[taskQueue[aJob.taskID].at(i)], &counterCond));
                         }
                     }
-                } catch(std::exception& e) {
-                    printf("2 exception catched: %s\n", e.what());
-                } catch (...) {
-                    printf("2 ... exception\n");
-                }
+                // } catch(std::exception& e) {
+                //     printf("2 exception catched: %s\n", e.what());
+                // } catch (...) {
+                //     printf("2 ... exception\n");
+                // }
                 }
             }
         }
