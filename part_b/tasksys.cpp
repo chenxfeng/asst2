@@ -141,9 +141,9 @@ void TaskSystemParallelThreadPoolSleeping::func() {
             if (taskQueue.size()) {
                 ///start the succeed task
                 for (int i = 0; i < taskQueue[aJob.taskID].size(); ++i) {
-                try {
                     ///if all dependent task has finished
                     bool isReady = true;
+                try {
                     for (int j = 0; j < taskDeps[taskQueue[aJob.taskID].at(i)].size(); ++j) {
                         if (taskWorks[taskDeps[taskQueue[aJob.taskID].at(i)].at(j)]->load() != 0) {
                             isReady = false;
