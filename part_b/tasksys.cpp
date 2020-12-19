@@ -146,7 +146,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                     TaskID tid = taskQueue[aJob.taskID][i];
                     ///if all dependent task has finished
                     bool isReady = true;
-                // try {
+                try {
                     // assert(aJob.taskID < taskQueue.size());
                     // assert(i < taskQueue[aJob.taskID].size());
                     // assert(taskQueue[aJob.taskID].at(i) < taskDeps.size());
@@ -158,12 +158,12 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                             break;
                         }
                     }
-                // } catch(std::exception& e) {
-                //     printf("1 exception catched: %s\n", e.what());
-                // } catch (...) {
-                //     printf("1 ... exception\n");
-                // }
-                // try {
+                } catch(std::exception& e) {
+                    printf("1 exception catched: %s\n", e.what());
+                } catch (...) {
+                    printf("1 ... exception\n");
+                }
+                try {
                     std::pair<IRunnable*, int> handle = taskHandl.at(tid);
                     if (isReady && taskWorks.at(tid)->load() != 0) {
                         // assert(aJob.taskID < taskQueue.size());
@@ -175,11 +175,11 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                                 taskWorks.at(tid), &counterCond));
                         }
                     }
-                // } catch(std::exception& e) {
-                //     printf("2 exception catched: %s\n", e.what());
-                // } catch (...) {
-                //     printf("2 ... exception\n");
-                // }
+                } catch(std::exception& e) {
+                    printf("2 exception catched: %s\n", e.what());
+                } catch (...) {
+                    printf("2 ... exception\n");
+                }
                 }
             }
         }
