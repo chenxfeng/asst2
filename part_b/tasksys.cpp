@@ -136,9 +136,9 @@ void TaskSystemParallelThreadPoolSleeping::func() {
 
         *(aJob.counter) -= 1;//-- operator isn't OK
         int zero = 0, nega = -1;
-        if (aJob.counter->load() == 0) {
-            printf("Job %d remaind %d\n", aJob.id, workQueue.workQueue.size());
-        }
+        // if (aJob.counter->load() == 0) {
+        //     printf("Job %d remaind %d\n", aJob.id, workQueue.workQueue.size());
+        // }
         ///zero != counter   ==>  zero is modified to counter and ret false
         ///zero == counter   ==>  counter is modified to nega and ret true
         if (aJob.counter->compare_exchange_strong(zero, nega)) {
@@ -157,7 +157,8 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                     for (int j = 0; j < taskDeps.at(tid).size(); ++j) {
                         // assert(j < taskDeps[taskQueue[aJob.taskID].at(i)].size());
                         // assert(taskDeps[taskQueue[aJob.taskID].at(i)].at(j) < taskWorks.size());
-                        if (taskWorks.at(taskDeps.at(tid).at(j))->load() != 0) {
+                        if (taskWorks.at(taskDeps.at(tid).at(j))->load() == 0 || 
+                            taskWorks.at(taskDeps.at(tid).at(j))->load() == -1) {
                             isReady = false;
                             break;
                         }
