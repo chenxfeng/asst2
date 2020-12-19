@@ -253,7 +253,7 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
 }
 
 void TaskSystemParallelThreadPoolSleeping::sync() {
-    printf("waiting %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
+    // printf("waiting %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
     //
     // TODO: CS149 students will modify the implementation of this method in Part B.
     //
@@ -269,7 +269,7 @@ void TaskSystemParallelThreadPoolSleeping::sync() {
         }
         // printf("task %d of %d tasks finish\n", i, taskWorks.size());
     }
-    printf("finish %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
+    // printf("finish %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
     for (int i = 0; i < taskWorks.size(); ++i) delete taskWorks[i];
     taskQueue.clear();
     taskDeps.clear();
