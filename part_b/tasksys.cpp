@@ -161,7 +161,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                     }
                     std::pair<IRunnable*, int> handle = taskHandl.at(tid);
                     std::atomic<int>* counter = taskWorks.at(tid);
-                    if (isReady && counter->load() == handle.second) {
+                    if (isReady/* && counter->load() == handle.second*/) {
                         for (int j = 0; j < handle.second; j++) {
                             workQueue.push(Tuple(tid, handle.first, j, handle.second, 
                                 counter, &counterCond));
