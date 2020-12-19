@@ -145,7 +145,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
         if (aJob.counter->compare_exchange_strong(zero, nega)) {
             ///if run async With dependency
             if (taskQueue.size()) {
-                printf("job %d in %d before jobs: %d\n", aJob.taskID, taskQueue.size(), taskQueue[aJob.taskID].size());
+                // printf("job %d in %d before jobs: %d\n", aJob.taskID, taskQueue.size(), taskQueue[aJob.taskID].size());
                 assert(aJob.taskID < taskQueue.size());
                 ///start the succeed task
                 for (int i = 0; i < taskQueue[aJob.taskID].size(); ++i) {
@@ -166,7 +166,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                             workQueue.push(Tuple(tid, handle.first, j, handle.second, 
                                 counter, &counterCond));
                         }
-                        printf("job %d ready: %d vs %d\n", tid, handle.second, counter->load());
+                        // printf("job %d ready: %d vs %d\n", tid, handle.second, counter->load());
                     }
                 }
             }
