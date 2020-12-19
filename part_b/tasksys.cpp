@@ -139,12 +139,11 @@ void TaskSystemParallelThreadPoolSleeping::func() {
             ///notice sync if waiting
             aJob.counterCond->notify_one();
         }
-        int zero = 0, nega = -1;
-        ///zero != counter   ==>  zero is modified to counter and ret false
-        ///zero == counter   ==>  counter is modified to nega and ret true
-        if (aJob.counter->compare_exchange_strong(zero, nega)) {
-            ///if run async With dependency
-            if (taskQueue.size()) {
+        if (taskQueue.size()) {///if run async With dependency
+            int zero = 0, nega = -1;
+            ///zero != counter   ==>  zero is modified to counter and ret false
+            ///zero == counter   ==>  counter is modified to nega and ret true
+            if (aJob.counter->compare_exchange_strong(zero, nega)) {
                 // printf("job %d in %d before jobs: %d\n", aJob.taskID, taskQueue.size(), taskQueue[aJob.taskID].size());
                 assert(aJob.taskID < taskQueue.size());
                 ///start the succeed task
@@ -154,14 +153,15 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                     bool isReady = true;
                     for (int j = 0; j < taskDeps.at(tid).size(); ++j) {
                         if (taskWorks.at(taskDeps.at(tid).at(j))->load() != 0 && 
-                            taskWorks.at(taskDeps.at(tid).at(j))->load() != -1) {
+                            taskWorks.at(taskDeps.at(tid).at(j))->load() != -1 &&
+                            taskWorks.at(taskDeps.at(tid).at(j))->load() != -2) {
                             isReady = false;
                             break;
                         }
                     }
                     std::pair<IRunnable*, int> handle = taskHandl.at(tid);
                     std::atomic<int>* counter = taskWorks.at(tid);
-                    if (isReady && counter->load() != 0) {
+                    if (isReady && counter->load == handle.second) {
                         for (int j = 0; j < handle.second; j++) {
                             workQueue.push(Tuple(tid, handle.first, j, handle.second, 
                                 counter, &counterCond));
@@ -169,8 +169,8 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                         // printf("job %d ready: %d vs %d\n", tid, handle.second, counter->load());
                     }
                 }
+                aJob.counter->store(-2);
             }
-            aJob.counter->store(-2);
         }
     }
 }
@@ -227,7 +227,6 @@ void TaskSystemParallelThreadPoolSleeping::run(IRunnable* runnable, int num_tota
 
 TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnable, int num_total_tasks,
                                                     const std::vector<TaskID>& deps) {
-    // printf("begin %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
     //
     // TODO: CS149 students will implement this method in Part B.
     //
@@ -248,7 +247,6 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
             taskQueue[taskDeps[taskId].at(i)].push_back(taskId);
         }
     }
-    // printf("doing %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
     return taskId;
 }
 
