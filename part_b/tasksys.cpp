@@ -168,7 +168,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                             workQueue.push(Tuple(tid, handle.first, j, handle.second, 
                                 taskWorks.at(tid), &counterCond));
                         }
-                        printf("job %d ready: %d\n", tid, taskWorks.at(tid)->load());
+                        printf("job %d ready: %d vs %d\n", tid, handle.second, taskWorks.at(tid)->load());
                     }
                 // } catch(std::exception& e) {
                 //     printf("2 exception catched: %s\n", e.what());
