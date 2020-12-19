@@ -143,43 +143,44 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                 assert(aJob.taskID < taskQueue.size());
                 ///start the succeed task
                 for (int i = 0; i < taskQueue[aJob.taskID].size(); ++i) {
+                    TaskID tid = taskQueue[aJob.taskID][i];
                     ///if all dependent task has finished
                     bool isReady = true;
-                try {
+                // try {
                     // assert(aJob.taskID < taskQueue.size());
                     // assert(i < taskQueue[aJob.taskID].size());
                     // assert(taskQueue[aJob.taskID].at(i) < taskDeps.size());
-                    for (int j = 0; j < taskDeps.at(taskQueue[aJob.taskID][i]).size(); ++j) {
+                    for (int j = 0; j < taskDeps.at(tid).size(); ++j) {
                         // assert(j < taskDeps[taskQueue[aJob.taskID].at(i)].size());
                         // assert(taskDeps[taskQueue[aJob.taskID].at(i)].at(j) < taskWorks.size());
-                        if (taskWorks.at(taskDeps.at(taskQueue[aJob.taskID][i]).at(j))->load() != 0) {
+                        if (taskWorks.at(taskDeps.at(tid).at(j))->load() != 0) {
                             isReady = false;
                             break;
                         }
                     }
-                } catch(std::exception& e) {
-                    printf("1 exception catched: %s\n", e.what());
-                } catch (...) {
-                    printf("1 ... exception\n");
-                }
-                try {
-                    if (isReady) {
+                // } catch(std::exception& e) {
+                //     printf("1 exception catched: %s\n", e.what());
+                // } catch (...) {
+                //     printf("1 ... exception\n");
+                // }
+                // try {
+                    if (isReady && taskWorks.at(tid)->load() != 0) {
                         // assert(aJob.taskID < taskQueue.size());
                         // assert(i < taskQueue[aJob.taskID].size());
                         // assert(taskQueue[aJob.taskID].at(i) < taskHandl.size());
                         // assert(taskQueue[aJob.taskID].at(i) < taskWorks.size());
-                        for (int j = 0; j < taskHandl.at(taskQueue[aJob.taskID][i]).second; j++) {
-                            workQueue.push(Tuple(taskQueue[aJob.taskID][i],
-                                taskHandl.at(taskQueue[aJob.taskID][i]).first, 
-                                j, taskHandl.at(taskQueue[aJob.taskID][i]).second, 
-                                taskWorks.at(taskQueue[aJob.taskID][i]), &counterCond));
+                        for (int j = 0; j < taskHandl.at(tid).second; j++) {
+                            workQueue.push(Tuple(,
+                                taskHandl.at(tid).first, 
+                                j, taskHandl.at(tid).second, 
+                                taskWorks.at(tid), &counterCond));
                         }
                     }
-                } catch(std::exception& e) {
-                    printf("2 exception catched: %s\n", e.what());
-                } catch (...) {
-                    printf("2 ... exception\n");
-                }
+                // } catch(std::exception& e) {
+                //     printf("2 exception catched: %s\n", e.what());
+                // } catch (...) {
+                //     printf("2 ... exception\n");
+                // }
                 }
             }
         }
