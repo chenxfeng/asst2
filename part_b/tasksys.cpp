@@ -135,7 +135,11 @@ void TaskSystemParallelThreadPoolSleeping::func() {
         aJob.runnable->runTask(aJob.id, aJob.num_total_tasks);
 
         *(aJob.counter) -= 1;//-- operator isn't OK
-        if (aJob.counter->load() == 0) {
+        int zero = 0, nega = -1;
+        // if (aJob.counter->load() == 0) {
+        ///zero != counter   ==>  zero is modified to counter and ret false
+        ///zero == counter   ==>  counter is modified to nega and ret true
+        if (aJob.counter->compare_exchange_strong(zero, nega)) {
             ///notice sync if waiting
             aJob.counterCond->notify_one();
             ///if run async With dependency
@@ -271,7 +275,7 @@ void TaskSystemParallelThreadPoolSleeping::sync() {
             // if (taskWorks.at(i)->load() != 0) 
             //     counterCond.wait(lck);
             ///must busy-waiting; or lock this loop code-block
-            if (taskWorks.at(i)->load() == 0) 
+            if (taskWorks.at(i)->load() == -1)//0) 
                 break;
         }
         // printf("task %d of %d tasks finish\n", i, taskWorks.size());
