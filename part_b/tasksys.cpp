@@ -164,15 +164,14 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                 //     printf("1 ... exception\n");
                 // }
                 // try {
+                    std::pair<IRunnable*, int> handle = taskHandl.at(tid);
                     if (isReady && taskWorks.at(tid)->load() != 0) {
                         // assert(aJob.taskID < taskQueue.size());
                         // assert(i < taskQueue[aJob.taskID].size());
                         // assert(taskQueue[aJob.taskID].at(i) < taskHandl.size());
                         // assert(taskQueue[aJob.taskID].at(i) < taskWorks.size());
-                        for (int j = 0; j < taskHandl.at(tid).second; j++) {
-                            workQueue.push(Tuple(tid,
-                                taskHandl.at(tid).first, 
-                                j, taskHandl.at(tid).second, 
+                        for (int j = 0; j < handle.second; j++) {
+                            workQueue.push(Tuple(tid, handle.first, j, handle.second, 
                                 taskWorks.at(tid), &counterCond));
                         }
                     }
