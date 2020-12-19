@@ -272,7 +272,7 @@ void TaskSystemParallelThreadPoolSleeping::sync() {
     // TODO: CS149 students will modify the implementation of this method in Part B.
     //
     try {
-    std::mutex counterLock;
+    // std::mutex counterLock;
     for (int i = 0; i < taskWorks.size(); ++i) {
         while (true) {
             // std::unique_lock<std::mutex> lck(counterLock);
