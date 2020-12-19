@@ -146,10 +146,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                     TaskID tid = taskQueue[aJob.taskID][i];
                     ///if all dependent task has finished
                     bool isReady = true;
-                try {
-                    // assert(aJob.taskID < taskQueue.size());
-                    // assert(i < taskQueue[aJob.taskID].size());
-                    // assert(taskQueue[aJob.taskID].at(i) < taskDeps.size());
+                // try {
                     for (int j = 0; j < taskDeps.at(tid).size(); ++j) {
                         // assert(j < taskDeps[taskQueue[aJob.taskID].at(i)].size());
                         // assert(taskDeps[taskQueue[aJob.taskID].at(i)].at(j) < taskWorks.size());
@@ -158,28 +155,24 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                             break;
                         }
                     }
-                } catch(std::exception& e) {
-                    printf("1 exception catched: %s\n", e.what());
-                } catch (...) {
-                    printf("1 ... exception\n");
-                }
-                try {
+                // } catch(std::exception& e) {
+                //     printf("1 exception catched: %s\n", e.what());
+                // } catch (...) {
+                //     printf("1 ... exception\n");
+                // }
+                // try {
                     std::pair<IRunnable*, int> handle = taskHandl.at(tid);
                     if (isReady && taskWorks.at(tid)->load() != 0) {
-                        // assert(aJob.taskID < taskQueue.size());
-                        // assert(i < taskQueue[aJob.taskID].size());
-                        // assert(taskQueue[aJob.taskID].at(i) < taskHandl.size());
-                        // assert(taskQueue[aJob.taskID].at(i) < taskWorks.size());
                         for (int j = 0; j < handle.second; j++) {
                             workQueue.push(Tuple(tid, handle.first, j, handle.second, 
                                 taskWorks.at(tid), &counterCond));
                         }
                     }
-                } catch(std::exception& e) {
-                    printf("2 exception catched: %s\n", e.what());
-                } catch (...) {
-                    printf("2 ... exception\n");
-                }
+                // } catch(std::exception& e) {
+                //     printf("2 exception catched: %s\n", e.what());
+                // } catch (...) {
+                //     printf("2 ... exception\n");
+                // }
                 }
             }
         }
@@ -279,6 +272,7 @@ void TaskSystemParallelThreadPoolSleeping::sync() {
         }
         // printf("task %d of %d tasks finish\n", i, taskWorks.size());
     }
+    printf("finished \n");
     for (int i = 0; i < taskWorks.size(); ++i) delete taskWorks[i];
     taskQueue.clear();
     taskDeps.clear();
