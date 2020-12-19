@@ -145,7 +145,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
         ///zero == counter   ==>  counter is modified to nega and ret true
         if (aJob.counter->compare_exchange_strong(zero, nega)) {
             if (taskQueue.size() && taskQueue[aJob.taskID].size()) {
-                // printf("job %d in %d before jobs: %d\n", aJob.taskID, taskQueue.size(), taskQueue[aJob.taskID].size());
+                printf("job %d in %d before jobs: %d\n", aJob.taskID, taskQueue.size(), taskQueue[aJob.taskID].size());
                 assert(aJob.taskID < taskQueue.size());
                 ///start the succeed task
                 for (int i = 0; i < taskQueue[aJob.taskID].size(); ++i) {
@@ -166,7 +166,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                             workQueue.push(Tuple(tid, handle.first, j, handle.second, 
                                 counter, &counterCond));
                         }
-                        // printf("job %d ready: %d vs %d\n", tid, handle.second, counter->load());
+                        printf("job %d ready: %d vs %d\n", tid, handle.second, counter->load());
                     }
                 }
             }
@@ -250,7 +250,7 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
 }
 
 void TaskSystemParallelThreadPoolSleeping::sync() {
-    // printf("waiting %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
+    printf("waiting %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
     //
     // TODO: CS149 students will modify the implementation of this method in Part B.
     //
@@ -266,7 +266,7 @@ void TaskSystemParallelThreadPoolSleeping::sync() {
         }
         // printf("task %d of %d tasks finish\n", i, taskWorks.size());
     }
-    // printf("finish %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
+    printf("finish %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
     for (int i = 0; i < taskWorks.size(); ++i) delete taskWorks[i];
     taskQueue.clear();
     taskDeps.clear();
