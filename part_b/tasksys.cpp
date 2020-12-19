@@ -242,28 +242,24 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
     //
     // TODO: CS149 students will implement this method in Part B.
     //
-    try {
+    TaskID taskId = taskQueue.size();
     taskQueue.push_back(std::vector<TaskID>());
-    taskDeps.push_back(deps);
+    taskDeps.push_back(std::vector<TaskID>(deps));
     taskHandl.push_back(std::pair<IRunnable*, int>(runnable, num_total_tasks));
     taskWorks.push_back(new std::atomic<int>(num_total_tasks));
-    ///task launch with no deps
-    if (deps.empty()) {
+    ///task launch without dependency
+    if (taskDeps[taskId].empty()) {
         for (int i = 0; i < num_total_tasks; i++) {
-            workQueue.push(Tuple(taskQueue.size()-1, runnable, i, 
-                num_total_tasks, taskWorks.back(), &counterCond));
+            workQueue.push(Tuple(taskId, taskHandl[taskId].first, i, 
+                            taskHandl[taskId].second, taskWorks[taskId], 
+                            &counterCond));
         }
     } else {
-        for (int i = 0; i < deps.size(); ++i) {
-            taskQueue[deps.at(i)].push_back(taskQueue.size()-1);
+        for (int i = 0; i < taskDeps[taskId].size(); ++i) {
+            taskQueue[taskDeps[taskId].at(i)].push_back(taskId);
         }
     }
-    } catch(std::exception& e) {
-        printf("run exception catched: %d\n", e.what());
-    } catch(...) {
-        printf("run ... exception\n");
-    }
-    return taskQueue.size()-1;
+    return taskId;
 }
 
 void TaskSystemParallelThreadPoolSleeping::sync() {
@@ -271,7 +267,6 @@ void TaskSystemParallelThreadPoolSleeping::sync() {
     //
     // TODO: CS149 students will modify the implementation of this method in Part B.
     //
-    try {
     // std::mutex counterLock;
     for (int i = 0; i < taskWorks.size(); ++i) {
         while (true) {
@@ -289,10 +284,6 @@ void TaskSystemParallelThreadPoolSleeping::sync() {
     taskDeps.clear();
     taskHandl.clear();
     taskWorks.clear();
-    } catch(std::exception& e) {
-        printf("sync exception catched: %d\n", e.what());
-    } catch(...) {
-        printf("sync ... exception\n");
-    }
+
     return;
 }
