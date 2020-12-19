@@ -135,15 +135,14 @@ void TaskSystemParallelThreadPoolSleeping::func() {
         aJob.runnable->runTask(aJob.id, aJob.num_total_tasks);
 
         *(aJob.counter) -= 1;//-- operator isn't OK
+        if (aJob.counter->load() == 0) {
+            ///notice sync if waiting
+            aJob.counterCond->notify_one();
+        }
         int zero = 0, nega = -1;
-        // if (aJob.counter->load() == 0) {
-        //     printf("Job %d remaind %d\n", aJob.id, workQueue.workQueue.size());
-        // }
         ///zero != counter   ==>  zero is modified to counter and ret false
         ///zero == counter   ==>  counter is modified to nega and ret true
         if (aJob.counter->compare_exchange_strong(zero, nega)) {
-            ///notice sync if waiting
-            aJob.counterCond->notify_one();
             ///if run async With dependency
             if (taskQueue.size()) {
                 printf("job %d in %d before jobs: %d\n", aJob.taskID, taskQueue.size(), taskQueue[aJob.taskID].size());
@@ -153,22 +152,13 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                     TaskID tid = taskQueue[aJob.taskID][i];
                     ///if all dependent task has finished
                     bool isReady = true;
-                // try {
                     for (int j = 0; j < taskDeps.at(tid).size(); ++j) {
-                        // assert(j < taskDeps[taskQueue[aJob.taskID].at(i)].size());
-                        // assert(taskDeps[taskQueue[aJob.taskID].at(i)].at(j) < taskWorks.size());
                         if (taskWorks.at(taskDeps.at(tid).at(j))->load() != 0 && 
                             taskWorks.at(taskDeps.at(tid).at(j))->load() != -1) {
                             isReady = false;
                             break;
                         }
                     }
-                // } catch(std::exception& e) {
-                //     printf("1 exception catched: %s\n", e.what());
-                // } catch (...) {
-                //     printf("1 ... exception\n");
-                // }
-                // try {
                     std::pair<IRunnable*, int> handle = taskHandl.at(tid);
                     std::atomic<int>* counter = taskWorks.at(tid);
                     if (isReady && counter->load() != 0) {
@@ -178,13 +168,9 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                         }
                         printf("job %d ready: %d vs %d\n", tid, handle.second, counter->load());
                     }
-                // } catch(std::exception& e) {
-                //     printf("2 exception catched: %s\n", e.what());
-                // } catch (...) {
-                //     printf("2 ... exception\n");
-                // }
                 }
             }
+            aJob.counter->store(-2);
         }
     }
 }
@@ -278,7 +264,7 @@ void TaskSystemParallelThreadPoolSleeping::sync() {
             // if (taskWorks.at(i)->load() != 0) 
             //     counterCond.wait(lck);
             ///must busy-waiting; or lock this loop code-block
-            if (taskWorks.at(i)->load() == -1)//0) 
+            if (taskWorks.at(i)->load() == -2)//-1)//0) 
                 break;
         }
         // printf("task %d of %d tasks finish\n", i, taskWorks.size());
