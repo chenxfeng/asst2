@@ -170,7 +170,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                         // assert(taskQueue[aJob.taskID].at(i) < taskHandl.size());
                         // assert(taskQueue[aJob.taskID].at(i) < taskWorks.size());
                         for (int j = 0; j < taskHandl.at(tid).second; j++) {
-                            workQueue.push(Tuple(,
+                            workQueue.push(Tuple(tid,
                                 taskHandl.at(tid).first, 
                                 j, taskHandl.at(tid).second, 
                                 taskWorks.at(tid), &counterCond));
