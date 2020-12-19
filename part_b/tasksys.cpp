@@ -231,7 +231,7 @@ void TaskSystemParallelThreadPoolSleeping::run(IRunnable* runnable, int num_tota
 
 TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnable, int num_total_tasks,
                                                     const std::vector<TaskID>& deps) {
-
+    printf("begin %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
     //
     // TODO: CS149 students will implement this method in Part B.
     //
@@ -252,11 +252,12 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
             taskQueue[taskDeps[taskId].at(i)].push_back(taskId);
         }
     }
+    printf("doing %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
     return taskId;
 }
 
 void TaskSystemParallelThreadPoolSleeping::sync() {
-
+    printf("waiting %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
     //
     // TODO: CS149 students will modify the implementation of this method in Part B.
     //
@@ -272,7 +273,7 @@ void TaskSystemParallelThreadPoolSleeping::sync() {
         }
         // printf("task %d of %d tasks finish\n", i, taskWorks.size());
     }
-    printf("finished \n");
+    printf("finish %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
     for (int i = 0; i < taskWorks.size(); ++i) delete taskWorks[i];
     taskQueue.clear();
     taskDeps.clear();
