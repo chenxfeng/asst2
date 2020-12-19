@@ -137,7 +137,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
         *(aJob.counter) -= 1;//-- operator isn't OK
         int zero = 0, nega = -1;
         if (aJob.counter->load() == 0) {
-            printf("Job %d remaind %d\n", aJob.id, workQueue.size());
+            printf("Job %d remaind %d\n", aJob.id, workQueue.workQueue.size());
         }
         ///zero != counter   ==>  zero is modified to counter and ret false
         ///zero == counter   ==>  counter is modified to nega and ret true
