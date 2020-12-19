@@ -146,7 +146,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
         if (aJob.counter->compare_exchange_strong(zero, nega)) {
             if (taskQueue.size() && taskQueue[aJob.taskID].size()) {
                 printf("job %d in %d before jobs: %d\n", aJob.taskID, taskQueue.size(), taskQueue[aJob.taskID].size());
-                assert(aJob.taskID < taskQueue.size());
+                // assert(aJob.taskID < taskQueue.size());
                 ///start the succeed task
                 for (int i = 0; i < taskQueue[aJob.taskID].size(); ++i) {
                     TaskID tid = taskQueue[aJob.taskID][i];
@@ -230,6 +230,7 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
     //
     // TODO: CS149 students will implement this method in Part B.
     //
+    printf("begin %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
     TaskID taskId = taskQueue.size();
     taskQueue.push_back(std::vector<TaskID>());
     taskDeps.push_back(std::vector<TaskID>(deps));
@@ -247,6 +248,7 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
             taskQueue[taskDeps[taskId].at(i)].push_back(taskId);
         }
     }
+    printf("doing %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
     return taskId;
 }
 
