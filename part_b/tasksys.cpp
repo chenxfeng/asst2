@@ -159,6 +159,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                             break;
                         }
                     }
+                    printf("job %d ready: %d with %d deps\n", tid, isReady, taskDeps.at(tid).size());
                     if (isReady/* && counter->load() == handle.second*/) {
                         std::pair<IRunnable*, int> handle = taskHandl.at(tid);
                         std::atomic<int>* counter = taskWorks.at(tid);
