@@ -152,8 +152,8 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                     ///if all dependent task has finished
                     bool isReady = true;
                     for (int j = 0; j < taskDeps.at(tid).size(); ++j) {
-                        if (taskWorks.at(taskDeps.at(tid).at(j))->load() != 0 && 
-                            taskWorks.at(taskDeps.at(tid).at(j))->load() != -1 &&
+                        if (/*taskWorks.at(taskDeps.at(tid).at(j))->load() != 0 && 
+                            taskWorks.at(taskDeps.at(tid).at(j))->load() != -1 &&*/
                             taskWorks.at(taskDeps.at(tid).at(j))->load() != -2) {
                             isReady = false;
                             break;
@@ -161,7 +161,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                     }
                     std::pair<IRunnable*, int> handle = taskHandl.at(tid);
                     std::atomic<int>* counter = taskWorks.at(tid);
-                    if (isReady && counter->load == handle.second) {
+                    if (isReady && counter->load() == handle.second) {
                         for (int j = 0; j < handle.second; j++) {
                             workQueue.push(Tuple(tid, handle.first, j, handle.second, 
                                 counter, &counterCond));
