@@ -142,7 +142,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
         }
         ///if run async With dependency
         int zero = 0, nega = -1;
-        bool inner_cond = taskQueue.size() && taskQueue[aJob.taskID].size();
+        bool inner_cond = !(taskQueue.empty() || taskQueue[aJob.taskID].empty());
         ///zero != counter   ==>  zero is modified to counter and ret false
         ///zero == counter   ==>  counter is modified to nega and ret true
         if (aJob.counter->compare_exchange_strong(zero, nega)) {
