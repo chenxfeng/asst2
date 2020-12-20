@@ -116,10 +116,46 @@ class TaskSystemParallelThreadPoolSleeping: public ITaskSystem {
         WorkQueue workQueue;
         void func();
         ///async dependency sched
-        std::vector<std::vector<TaskID> > taskQueue;//task's succeed tasks 
-        std::vector<std::vector<TaskID> > taskDeps; //task's dependent tasks
-        std::vector<std::pair<IRunnable*, int> > taskHandl;
-        std::vector<std::atomic<int>* > taskWorks;//task's works-counter
+        // std::vector<std::vector<TaskID> > taskQueue;//task's succeed tasks 
+        // std::vector<std::vector<TaskID> > taskDeps; //task's dependent tasks
+        // std::vector<std::pair<IRunnable*, int> > taskHandl;
+        // std::vector<std::atomic<int>* > taskWorks;//task's works-counter
+        ///thread-safe vector
+        template <class T>
+        struct Vector {
+            std::mutex mut;
+            std::condition_variable cond;
+            std::vector<T> storage;
+            void push_back(const T& val) {
+                const std::lock_guard<std::mutex> lck(mut);
+                storage.push_back(val);
+                cond.notify_one();
+            }
+            unsigned int size() {
+                const std::lock_guard<std::mutex> lck(mut);
+                unsigned int res = storage.size();
+                cond.notify_one();
+                return res;
+            }
+            T& at(int index) {
+                const std::lock_guard<std::mutex> lck(mut);
+                T& res = storage.at(index);
+                cond.notify_one();
+                return res;
+            }
+            T& operator[](int index) {
+                return Vector::at(index);
+            }
+            void clear() {
+                const std::lock_guard<std::mutex> lck(mut);
+                storage.clear();
+                cond.notify_one();
+            }
+        };
+        Vector<Vector<TaskID> > taskQueue;
+        Vector<Vector<TaskID> > taskDeps;
+        Vector<std::pair<IRunnable*, int> > taskHandl;
+        Vector<std::atomic<int>* > taskWorks;
         std::mutex counterMutex;
         std::condition_variable counterCond;
 };
