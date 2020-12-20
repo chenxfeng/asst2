@@ -141,12 +141,13 @@ void TaskSystemParallelThreadPoolSleeping::func() {
         }
         ///if run async With dependency
         int zero = 0, nega = -1;
+        bool inner_cond = taskQueue.size() && taskQueue[aJob.taskID].size();
         ///zero != counter   ==>  zero is modified to counter and ret false
         ///zero == counter   ==>  counter is modified to nega and ret true
         if (aJob.counter->compare_exchange_strong(zero, nega)) {
-            printf("job %d in %d has jobs: %d\n", aJob.taskID, taskQueue.size(), taskQueue[aJob.taskID].size());
-            assert(aJob.taskID < taskQueue.size());
-            if (taskQueue.size() && taskQueue[aJob.taskID].size()) {
+            // printf("job %d in %d has jobs: %d\n", aJob.taskID, taskQueue.size(), taskQueue[aJob.taskID].size());
+            // assert(aJob.taskID < taskQueue.size());
+            if (inner_cond) {
                 printf("job %d in %d before jobs: %d\n", aJob.taskID, taskQueue.size(), taskQueue[aJob.taskID].size());
                 ///start the succeed task
                 for (int i = 0; i < taskQueue[aJob.taskID].size(); ++i) {
