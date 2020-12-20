@@ -126,10 +126,10 @@ class TaskSystemParallelThreadPoolSleeping: public ITaskSystem {
             std::mutex mut;
             std::condition_variable cond;
             std::vector<T> storage;
-            Vector() {}
-            Vector(const std::vector<T>& vec) {
-                storage = std::vector<T>(vec);
-            }
+            // Vector() {}
+            // Vector(const std::vector<T>& vec) {
+            //     storage = std::vector<T>(vec);
+            // }
             void push_back(const T& val) {
                 const std::lock_guard<std::mutex> lck(mut);
                 storage.push_back(val);
@@ -162,8 +162,8 @@ class TaskSystemParallelThreadPoolSleeping: public ITaskSystem {
                 cond.notify_one();
             }
         };
-        Vector<Vector<TaskID> > taskQueue;
-        Vector<Vector<TaskID> > taskDeps;
+        Vector<std::vector<TaskID> > taskQueue;
+        Vector<std::vector<TaskID> > taskDeps;
         Vector<std::pair<IRunnable*, int> > taskHandl;
         Vector<std::atomic<int>* > taskWorks;
         std::mutex counterMutex;
