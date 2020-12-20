@@ -149,7 +149,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
             taskDone[aJob.taskID]->store(true);
             bool inner_cond = !(taskQueue.empty() || taskQueue[aJob.taskID].empty());
             // assert(aJob.taskID < taskQueue.size());
-            // printf("here, condition: %d\n", inner_cond);
+            printf("here, condition: %d\n", inner_cond);
             if (inner_cond) {
                 printf("job %d in %d before jobs: %d\n", aJob.taskID, taskQueue.size(), taskQueue[aJob.taskID].size());
                 ///start the succeed task
