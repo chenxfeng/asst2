@@ -139,16 +139,17 @@ void TaskSystemParallelThreadPoolSleeping::func() {
             ///notice sync if waiting
             aJob.counterCond->notify_one();
             printf("job %d in %d has jobs: %d\n", aJob.taskID, taskQueue.size(), taskQueue[aJob.taskID].size());
+            taskDone[aJob.taskID]->store(!(taskQueue.empty() || taskQueue[aJob.taskID].empty()));
         }
         ///if run async With dependency
         int zero = 0, nega = -1;
-        bool inner_cond = !(taskQueue.empty() || taskQueue[aJob.taskID].empty());
+        // bool inner_cond = !(taskQueue.empty() || taskQueue[aJob.taskID].empty());
         ///zero != counter   ==>  zero is modified to counter and ret false
         ///zero == counter   ==>  counter is modified to nega and ret true
         if (aJob.counter->compare_exchange_strong(zero, nega)) {
             // assert(aJob.taskID < taskQueue.size());
-            printf("here, condition: %d\n", inner_cond);
-            if (inner_cond) {
+            printf("here, condition: %d\n", taskDone[aJob.taskID]->load());
+            if (taskDone[aJob.taskID]->load()) {
                 printf("job %d in %d before jobs: %d\n", aJob.taskID, taskQueue.size(), taskQueue[aJob.taskID].size());
                 ///start the succeed task
                 for (int i = 0; i < taskQueue[aJob.taskID].size(); ++i) {
@@ -237,6 +238,7 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
     TaskID taskId = taskQueue.size();
     // taskQueue.push_back(std::vector<TaskID>());
     taskQueue.push_back(Vector<TaskID>());
+    taskDone.push_back(new std::atomic<bool>(false));
     taskDeps.push_back(std::vector<TaskID>(deps));
     taskHandl.push_back(std::pair<IRunnable*, int>(runnable, num_total_tasks));
     taskWorks.push_back(new std::atomic<int>(num_total_tasks));
@@ -248,6 +250,7 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
                             &counterCond));
         }
     } else {
+        bool isReady = true;
         for (int i = 0; i < taskDeps[taskId].size(); ++i) {
             taskQueue[taskDeps[taskId].at(i)].push_back(taskId);
         }
@@ -274,7 +277,10 @@ void TaskSystemParallelThreadPoolSleeping::sync() {
         printf("task %d of %d tasks finish\n", i, taskWorks.size());
     }
     printf("finish %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
-    for (int i = 0; i < taskWorks.size(); ++i) delete taskWorks[i];
+    for (int i = 0; i < taskWorks.size(); ++i) {
+        delete taskDone[i];
+        delete taskWorks[i];
+    }
     taskQueue.clear();
     taskDeps.clear();
     taskHandl.clear();
