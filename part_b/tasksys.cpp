@@ -151,13 +151,15 @@ void TaskSystemParallelThreadPoolSleeping::func() {
             if (inner_cond) {
                 printf("job %d in %d before jobs: %d\n", aJob.taskID, taskQueue.size(), taskQueue[aJob.taskID].size());
                 ///start the succeed task
-                for (int i = 0; i < taskQueue[aJob.taskID].size(); ++i) {
-                    TaskID tid = taskQueue[aJob.taskID][i];
+                std::vector<TaskID> succeedJob = taskQueue[aJob.taskID];
+                for (int i = 0; i < succeedJob.size(); ++i) {
+                    TaskID tid = succeedJob[i];
                     ///if all dependent task has finished
                     bool isReady = true;
-                    for (int j = 0; j < taskDeps.at(tid).size(); ++j) {
-                        if (taskDeps.at(tid).at(j) == aJob.taskID) continue;
-                        if (taskWorks.at(taskDeps.at(tid).at(j))->load() != -1) {
+                    std::vector<TaskID> deps = taskDeps.at(tid);
+                    for (int j = 0; j < deps.size(); ++j) {
+                        if (deps.at(j) == aJob.taskID) continue;
+                        if (taskWorks.at(deps.at(j))->load() != -1) {
                             isReady = false;
                             break;
                         }
