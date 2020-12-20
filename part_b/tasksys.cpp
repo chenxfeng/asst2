@@ -269,7 +269,7 @@ void TaskSystemParallelThreadPoolSleeping::sync() {
             if (taskWorks.at(i)->load() == -1)//0) 
                 break;
         }
-        // printf("task %d of %d tasks finish\n", i, taskWorks.size());
+        printf("task %d of %d tasks finish\n", i, taskWorks.size());
     }
     printf("finish %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
     for (int i = 0; i < taskWorks.size(); ++i) delete taskWorks[i];
