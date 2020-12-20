@@ -143,13 +143,14 @@ void TaskSystemParallelThreadPoolSleeping::func() {
         ///if run async With dependency
         int zero = 0, nega = -1;
         // bool inner_cond = !(taskQueue.empty() || taskQueue[aJob.taskID].empty());
-        taskDone[aJob.taskID]->store(!(taskQueue.empty() || taskQueue[aJob.taskID].empty()));
         ///zero != counter   ==>  zero is modified to counter and ret false
         ///zero == counter   ==>  counter is modified to nega and ret true
         if (aJob.counter->compare_exchange_strong(zero, nega)) {
+            taskDone[aJob.taskID]->store(true);
+            bool inner_cond = !(taskQueue.empty() || taskQueue[aJob.taskID].empty());
             // assert(aJob.taskID < taskQueue.size());
-            printf("here, condition: %d\n", taskDone[aJob.taskID]->load());
-            if (taskDone[aJob.taskID]->load()) {
+            printf("here, condition: %d\n", inner_cond);
+            if (inner_cond) {
                 printf("job %d in %d before jobs: %d\n", aJob.taskID, taskQueue.size(), taskQueue[aJob.taskID].size());
                 ///start the succeed task
                 for (int i = 0; i < taskQueue[aJob.taskID].size(); ++i) {
@@ -252,7 +253,17 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
     } else {
         bool isReady = true;
         for (int i = 0; i < taskDeps[taskId].size(); ++i) {
-            taskQueue[taskDeps[taskId].at(i)].push_back(taskId);
+            if (taskDone[taskId]->load() == false) {
+                isReady = false;
+                taskQueue[taskDeps[taskId].at(i)].push_back(taskId);
+            }
+        }
+        if (isReady) {
+            for (int i = 0; i < num_total_tasks; i++) {
+                workQueue.push(Tuple(taskId, taskHandl[taskId].first, i, 
+                                taskHandl[taskId].second, taskWorks[taskId], 
+                                &counterCond));
+            }
         }
     }
     // printf("doing %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
