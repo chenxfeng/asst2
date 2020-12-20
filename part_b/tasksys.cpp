@@ -138,7 +138,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
         if (aJob.counter->load() == 0) {
             ///notice sync if waiting
             aJob.counterCond->notify_one();
-            printf("job %d in %d has jobs: %d\n", aJob.taskID, taskQueue.size(), taskQueue[aJob.taskID].size());
+            // printf("job %d in %d has jobs: %d\n", aJob.taskID, taskQueue.size(), taskQueue[aJob.taskID].size());
         }
         ///if run async With dependency
         int zero = 0, nega = -1;
@@ -149,9 +149,9 @@ void TaskSystemParallelThreadPoolSleeping::func() {
             taskDone[aJob.taskID]->store(true);
             bool inner_cond = !(taskQueue.empty() || taskQueue[aJob.taskID].empty());
             // assert(aJob.taskID < taskQueue.size());
-            printf("here, condition: %d\n", inner_cond);
+            // printf("here, condition: %d\n", inner_cond);
             if (inner_cond) {
-                printf("job %d in %d before jobs: %d\n", aJob.taskID, taskQueue.size(), taskQueue[aJob.taskID].size());
+                // printf("job %d in %d before jobs: %d\n", aJob.taskID, taskQueue.size(), taskQueue[aJob.taskID].size());
                 ///start the succeed task
                 for (int i = 0; i < taskQueue[aJob.taskID].size(); ++i) {
                     TaskID tid = taskQueue[aJob.taskID][i];
@@ -164,7 +164,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                             break;
                         }
                     }
-                    printf("job %d ready: %d with %d jobs\n", tid, isReady, taskWorks.at(tid)->load());
+                    // printf("job %d ready: %d with %d jobs\n", tid, isReady, taskWorks.at(tid)->load());
                     if (isReady/* && counter->load() == handle.second*/) {
                         std::pair<IRunnable*, int> handle = taskHandl.at(tid);
                         std::atomic<int>* counter = taskWorks.at(tid);
@@ -172,7 +172,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                             workQueue.push(Tuple(tid, handle.first, j, handle.second, 
                                 counter, &counterCond));
                         }
-                        printf("job %d ready: %d vs %d\n", tid, handle.second, counter->load());
+                        // printf("job %d ready: %d vs %d\n", tid, handle.second, counter->load());
                     }
                 }
             }
@@ -271,7 +271,7 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
 }
 
 void TaskSystemParallelThreadPoolSleeping::sync() {
-    printf("waiting %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
+    // printf("waiting %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
     //
     // TODO: CS149 students will modify the implementation of this method in Part B.
     //
@@ -285,9 +285,9 @@ void TaskSystemParallelThreadPoolSleeping::sync() {
             if (taskWorks.at(i)->load() == -1)//0) 
                 break;
         }
-        printf("task %d of %d tasks finish\n", i, taskWorks.size());
+        // printf("task %d of %d tasks finish\n", i, taskWorks.size());
     }
-    printf("finish %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
+    // printf("finish %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
     for (int i = 0; i < taskWorks.size(); ++i) {
         delete taskDone[i];
         delete taskWorks[i];
