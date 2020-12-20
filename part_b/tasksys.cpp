@@ -142,7 +142,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
         }
         ///if run async With dependency
         int zero = 0, nega = -1;
-        bool inner_cond = taskQueue.size() && taskQueue[aJob.taskID].empty();
+        bool inner_cond = taskQueue.size() && taskQueue[aJob.taskID].size();
         ///zero != counter   ==>  zero is modified to counter and ret false
         ///zero == counter   ==>  counter is modified to nega and ret true
         if (aJob.counter->compare_exchange_strong(zero, nega)) {
@@ -235,8 +235,10 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
     //
     // printf("begin %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
     TaskID taskId = taskQueue.size();
-    taskQueue.push_back(std::vector<TaskID>());
-    taskDeps.push_back(std::vector<TaskID>(deps));
+    // taskQueue.push_back(std::vector<TaskID>());
+    // taskDeps.push_back(std::vector<TaskID>(deps));
+    taskQueue.push_back(Vector<TaskID>());
+    taskDeps.push_back(Vector<TaskID>(deps));
     taskHandl.push_back(std::pair<IRunnable*, int>(runnable, num_total_tasks));
     taskWorks.push_back(new std::atomic<int>(num_total_tasks));
     ///task launch without dependency
