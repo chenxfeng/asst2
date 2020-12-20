@@ -126,7 +126,7 @@ class TaskSystemParallelThreadPoolSleeping: public ITaskSystem {
             std::mutex mut;
             // std::condition_variable cond;
             std::vector<T> storage;
-            Vector() = delete;
+            Vector() {}
             Vector(const Vector<T>& vec) {
                 storage = vec.storage;
             }
