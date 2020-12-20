@@ -147,6 +147,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
         ///zero == counter   ==>  counter is modified to nega and ret true
         if (aJob.counter->compare_exchange_strong(zero, nega)) {
             // assert(aJob.taskID < taskQueue.size());
+            printf("here\n");
             if (inner_cond) {
                 printf("job %d in %d before jobs: %d\n", aJob.taskID, taskQueue.size(), taskQueue[aJob.taskID].size());
                 ///start the succeed task
