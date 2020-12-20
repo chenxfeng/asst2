@@ -124,33 +124,33 @@ class TaskSystemParallelThreadPoolSleeping: public ITaskSystem {
         template <class T>
         struct Vector {
             std::mutex mut;
-            std::condition_variable cond;
+            // std::condition_variable cond;
             std::vector<T> storage;
-            // Vector() {}
-            // Vector(const std::vector<T>& vec) {
-            //     storage = std::vector<T>(vec);
-            // }
+            Vector() = delete;
+            Vector(const Vector<T>& vec) {
+                storage = vec.storage;
+            }
             void push_back(const T& val) {
                 const std::lock_guard<std::mutex> lck(mut);
                 storage.push_back(val);
-                cond.notify_one();
+                // cond.notify_one();
             }
             unsigned int size() {
                 const std::lock_guard<std::mutex> lck(mut);
                 unsigned int res = storage.size();
-                cond.notify_one();
+                // cond.notify_one();
                 return res;
             }
             bool empty() {
                 const std::lock_guard<std::mutex> lck(mut);
                 bool res = storage.empty();
-                cond.notify_one();
+                // cond.notify_one();
                 return res;
             }
             T& at(int index) {
                 const std::lock_guard<std::mutex> lck(mut);
                 T& res = storage.at(index);
-                cond.notify_one();
+                // cond.notify_one();
                 return res;
             }
             T& operator[](int index) {
@@ -159,10 +159,10 @@ class TaskSystemParallelThreadPoolSleeping: public ITaskSystem {
             void clear() {
                 const std::lock_guard<std::mutex> lck(mut);
                 storage.clear();
-                cond.notify_one();
+                // cond.notify_one();
             }
         };
-        Vector<std::vector<TaskID> > taskQueue;
+        Vector<Vector<TaskID> > taskQueue;
         Vector<std::vector<TaskID> > taskDeps;
         Vector<std::pair<IRunnable*, int> > taskHandl;
         Vector<std::atomic<int>* > taskWorks;

@@ -235,7 +235,8 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
     //
     // printf("begin %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
     TaskID taskId = taskQueue.size();
-    taskQueue.push_back(std::vector<TaskID>());
+    // taskQueue.push_back(std::vector<TaskID>());
+    taskQueue.push_back(Vector<TaskID>());
     taskDeps.push_back(std::vector<TaskID>(deps));
     taskHandl.push_back(std::pair<IRunnable*, int>(runnable, num_total_tasks));
     taskWorks.push_back(new std::atomic<int>(num_total_tasks));
