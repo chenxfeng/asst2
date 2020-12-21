@@ -209,10 +209,10 @@ void TaskSystemParallelThreadPoolSleeping::func() {
         if (aJob.id == -1) return ;
         aJob.runnable->runTask(aJob.id, aJob.num_total_tasks);
 
-        // aJob.counterLock->lock();
+        aJob.counterLock->lock();
         *(aJob.counter) -= 1;//-- operator isn't OK
         if (*(aJob.counter) == 0) aJob.counterCond->notify_one();
-        // aJob.counterLock->unlock();
+        aJob.counterLock->unlock();
     }
 }
 
