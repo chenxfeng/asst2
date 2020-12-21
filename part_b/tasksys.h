@@ -116,8 +116,8 @@ class TaskSystemParallelThreadPoolSleeping: public ITaskSystem {
         WorkQueue workQueue;
         void func();
         ///async dependency sched
-        // std::vector<std::vector<TaskID> > taskQueue;//task's succeed tasks 
-        // std::vector<std::vector<TaskID> > taskDeps; //task's dependent tasks
+        // std::vector<std::vector<TaskID> > taskQueue;
+        // std::vector<std::vector<TaskID> > taskDeps;
         // std::vector<std::pair<IRunnable*, int> > taskHandl;
         // std::vector<std::atomic<int>* > taskWorks;//task's works-counter
         ///thread-safe vector
@@ -162,13 +162,13 @@ class TaskSystemParallelThreadPoolSleeping: public ITaskSystem {
                 // cond.notify_one();
             }
         };
-        Vector<Vector<TaskID> > taskQueue;
-        Vector<std::mutex* > taskDone;
-        Vector<std::vector<TaskID> > taskDeps;
-        Vector<std::pair<IRunnable*, int> > taskHandl;
-        Vector<std::atomic<int>* > taskWorks;
-        std::condition_variable counterCond;
-        std::atomic<int> threadCounter;
+        Vector<Vector<TaskID> > taskQueue;    ///a task's succeed tasks 
+        Vector<std::mutex* > taskDone;        ///lock before detect a task is asking succeed(-1)
+        Vector<std::vector<TaskID> > taskDeps;///a task's dependent tasks
+        Vector<std::pair<IRunnable*, int> > taskHandl;///a task infos for running
+        Vector<std::atomic<int>* > taskWorks; ///0 when task is finished; -1 while asking succeed
+        std::condition_variable counterCond;  ///useless, just for compatible with sync-run
+        std::atomic<int> threadCounter;       ///barrier before destroy resource; threads may still use resouce
 };
 
 #endif

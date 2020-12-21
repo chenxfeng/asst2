@@ -138,7 +138,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
         if (aJob.counter->load() == 0) {
             ///notice sync if waiting
             aJob.counterCond->notify_one();
-            printf("job %d in %d has jobs: %d\n", aJob.taskID, taskQueue.size(), taskQueue[aJob.taskID].size());
+            // printf("job %d in %d has jobs: %d\n", aJob.taskID, taskQueue.size(), taskQueue[aJob.taskID].size());
         }
         ///thread get into an special area
         threadCounter -= 1;
@@ -150,7 +150,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
             const std::lock_guard<std::mutex> lck(*(taskDone[aJob.taskID]));
             // assert(aJob.taskID < taskQueue.size());
             if (!(taskQueue.empty() || taskQueue[aJob.taskID].empty())) {
-                printf("job %d in %d before jobs: %d\n", aJob.taskID, taskQueue.size(), taskQueue[aJob.taskID].size());
+                // printf("job %d in %d before jobs: %d\n", aJob.taskID, taskQueue.size(), taskQueue[aJob.taskID].size());
                 ///start the succeed task
                 for (int i = 0; i < taskQueue[aJob.taskID].size(); ++i) {
                     TaskID tid = taskQueue[aJob.taskID][i];
@@ -163,7 +163,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                             break;
                         }
                     }
-                    printf("job %d ready: %d with %d jobs\n", tid, isReady, taskWorks.at(tid)->load());
+                    // printf("job %d ready: %d with %d jobs\n", tid, isReady, taskWorks.at(tid)->load());
                     if (isReady/* && counter->load() == handle.second*/) {
                         std::pair<IRunnable*, int> handle = taskHandl.at(tid);
                         std::atomic<int>* counter = taskWorks.at(tid);
@@ -171,7 +171,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                             workQueue.push(Tuple(tid, handle.first, j, handle.second, 
                                 counter, &counterCond));
                         }
-                        printf("job %d ready: %d vs %d\n", tid, handle.second, counter->load());
+                        // printf("job %d ready: %d vs %d\n", tid, handle.second, counter->load());
                     }
                 }
             }
@@ -239,14 +239,13 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
     //
     // printf("begin %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
     TaskID taskId = taskQueue.size();
-    // taskQueue.push_back(std::vector<TaskID>());
     taskQueue.push_back(Vector<TaskID>());
     taskDone.push_back(new std::mutex());
     taskDeps.push_back(std::vector<TaskID>(deps));
     taskHandl.push_back(std::pair<IRunnable*, int>(runnable, num_total_tasks));
     taskWorks.push_back(new std::atomic<int>(num_total_tasks));
-    ///task launch without dependency
     if (taskDeps[taskId].empty()) {
+        ///launch task without dependency
         for (int i = 0; i < num_total_tasks; i++) {
             workQueue.push(Tuple(taskId, taskHandl[taskId].first, i, 
                             taskHandl[taskId].second, taskWorks[taskId], 
@@ -255,12 +254,14 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
     } else {
         bool isReady = true;
         for (int i = 0; i < taskDeps[taskId].size(); ++i) {
+            ///lock before detecting work-state to guarantee thread-safety
             const std::lock_guard<std::mutex> lck(*(taskDone[taskDeps[taskId].at(i)]));
             if (taskWorks[taskDeps[taskId].at(i)]->load() > -1) {
                 isReady = false;
                 taskQueue[taskDeps[taskId].at(i)].push_back(taskId);
             }
         }
+        ///if all deps has done(-1), then we can add this task to executing queue
         if (isReady) {
             for (int i = 0; i < num_total_tasks; i++) {
                 workQueue.push(Tuple(taskId, taskHandl[taskId].first, i, 
@@ -274,23 +275,19 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
 }
 
 void TaskSystemParallelThreadPoolSleeping::sync() {
-    printf("waiting %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
+    // printf("waiting %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
     //
     // TODO: CS149 students will modify the implementation of this method in Part B.
     //
-    // std::mutex counterLock;
     for (int i = 0; i < taskWorks.size(); ++i) {
         while (true) {
-            // std::unique_lock<std::mutex> lck(counterLock);
-            // if (taskWorks.at(i)->load() != 0) 
-            //     counterCond.wait(lck);
-            ///must busy-waiting; or lock this loop code-block
+            ///must busy-waiting; or we can lock this loop code-block
             if (taskWorks.at(i)->load() == -1)//0) 
                 break;
         }
-        printf("task %d of %d tasks finish\n", i, taskWorks.size());
+        // printf("task %d of %d tasks finish\n", i, taskWorks.size());
     }
-    printf("finish %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
+    // printf("finish %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
     ///barrier for waiting last job to finish
     while (true) {
         if (threadCounter.load() == 0) break;
