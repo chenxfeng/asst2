@@ -167,6 +167,7 @@ class TaskSystemParallelThreadPoolSleeping: public ITaskSystem {
         Vector<std::vector<TaskID> > taskDeps;///a task's dependent tasks
         Vector<std::pair<IRunnable*, int> > taskHandl;///a task infos for running
         Vector<std::atomic<int>* > taskWorks; ///0 when task is finished; -1 while asking succeed
+        Vector<std::atomic<bool>* > taskStart;
         std::condition_variable counterCond;  ///useless, just for compatible with sync-run
         std::atomic<int> threadCounter;       ///barrier before destroy resource; threads may still use resouce
 };
