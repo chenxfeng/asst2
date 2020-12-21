@@ -146,7 +146,7 @@ void TaskSystemParallelThreadPoolSleeping::func() {
         int zero = 0, nega = -1;
         ///zero != counter   ==>  zero is modified to counter and ret false
         ///zero == counter   ==>  counter is modified to nega and ret true
-        if (aJob.counter->compare_exchange_strong(zero, nega)) {
+        if (taskQueue.size() && aJob.counter->compare_exchange_strong(zero, nega)) {
             const std::lock_guard<std::mutex> lck(*(taskDone[aJob.taskID]));
             // assert(aJob.taskID < taskQueue.size());
             if (!(taskQueue.empty() || taskQueue[aJob.taskID].empty())) {
