@@ -163,12 +163,12 @@ class TaskSystemParallelThreadPoolSleeping: public ITaskSystem {
             }
         };
         Vector<Vector<TaskID> > taskQueue;
-        Vector<std::atomic<bool>* > taskDone;
+        Vector<std::mutex* > taskDone;
         Vector<std::vector<TaskID> > taskDeps;
         Vector<std::pair<IRunnable*, int> > taskHandl;
         Vector<std::atomic<int>* > taskWorks;
-        std::mutex counterMutex;
         std::condition_variable counterCond;
+        std::atomic<int> threadCounter;
 };
 
 #endif

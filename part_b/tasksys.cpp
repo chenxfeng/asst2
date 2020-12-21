@@ -140,17 +140,16 @@ void TaskSystemParallelThreadPoolSleeping::func() {
             aJob.counterCond->notify_one();
             printf("job %d in %d has jobs: %d\n", aJob.taskID, taskQueue.size(), taskQueue[aJob.taskID].size());
         }
+        ///thread get into an special area
+        threadCounter -= 1;
         ///if run async With dependency
         int zero = 0, nega = -1;
-        // bool inner_cond = !(taskQueue.empty() || taskQueue[aJob.taskID].empty());
         ///zero != counter   ==>  zero is modified to counter and ret false
         ///zero == counter   ==>  counter is modified to nega and ret true
         if (aJob.counter->compare_exchange_strong(zero, nega)) {
-            taskDone[aJob.taskID]->store(true);
-            bool inner_cond = !(taskQueue.empty() || taskQueue[aJob.taskID].empty());
+            const std::lock_guard<std::mutex> lck(*(taskDone[aJob.taskID]));
             // assert(aJob.taskID < taskQueue.size());
-            printf("here, condition: %d\n", inner_cond);
-            if (inner_cond) {
+            if (!(taskQueue.empty() || taskQueue[aJob.taskID].empty())) {
                 printf("job %d in %d before jobs: %d\n", aJob.taskID, taskQueue.size(), taskQueue[aJob.taskID].size());
                 ///start the succeed task
                 for (int i = 0; i < taskQueue[aJob.taskID].size(); ++i) {
@@ -177,6 +176,8 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                 }
             }
         }
+        ///thread get out this special area
+        threadCounter += 1;
     }
 }
 
@@ -190,6 +191,7 @@ TaskSystemParallelThreadPoolSleeping::TaskSystemParallelThreadPoolSleeping(int n
     for (int i = 0; i < num_threads; ++i) {
         threads.push_back(std::thread(&TaskSystemParallelThreadPoolSleeping::func, this));
     }
+    threadCounter.store(0);
 }
 
 TaskSystemParallelThreadPoolSleeping::~TaskSystemParallelThreadPoolSleeping() {
@@ -239,7 +241,7 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
     TaskID taskId = taskQueue.size();
     // taskQueue.push_back(std::vector<TaskID>());
     taskQueue.push_back(Vector<TaskID>());
-    taskDone.push_back(new std::atomic<bool>(false));
+    taskDone.push_back(new std::mutex());
     taskDeps.push_back(std::vector<TaskID>(deps));
     taskHandl.push_back(std::pair<IRunnable*, int>(runnable, num_total_tasks));
     taskWorks.push_back(new std::atomic<int>(num_total_tasks));
@@ -253,7 +255,8 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
     } else {
         bool isReady = true;
         for (int i = 0; i < taskDeps[taskId].size(); ++i) {
-            if (taskDone[taskId]->load() == false) {
+            const std::lock_guard<std::mutex> lck(*(taskDone[taskDeps[taskId].at(i)]));
+            if (taskWorks[taskDeps[taskId].at(i)]->load() > -1) {
                 isReady = false;
                 taskQueue[taskDeps[taskId].at(i)].push_back(taskId);
             }
@@ -288,6 +291,10 @@ void TaskSystemParallelThreadPoolSleeping::sync() {
         printf("task %d of %d tasks finish\n", i, taskWorks.size());
     }
     printf("finish %d %d %d %d\n", taskQueue.size(), taskDeps.size(), taskHandl.size(), taskWorks.size());
+    ///barrier for waiting last job to finish
+    while (true) {
+        if (threadCounter.load() == 0) break;
+    }
     for (int i = 0; i < taskWorks.size(); ++i) {
         delete taskDone[i];
         delete taskWorks[i];
