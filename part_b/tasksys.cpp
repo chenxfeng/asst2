@@ -167,8 +167,9 @@ void TaskSystemParallelThreadPoolSleeping::func() {
                     std::atomic<int>* counter = taskWorks.at(tid);
                     std::pair<IRunnable*, int> handle = taskHandl.at(tid);
                     // int non_start = handle.second + 1;
+                    bool non_start = false;
                     ///thread-safety: only one thread would get into this code-block
-                    if (isReady/* && counter->compare_exchange_strong(non_start, handle.second)*/) {
+                    if (isReady && taskStart.at(tid)->compare_exchange_strong(non_start, true)) {
                         for (int j = 0; j < handle.second; j++) {
                             workQueue.push(Tuple(tid, handle.first, j, handle.second, 
                                 counter, &counterCond));
@@ -245,10 +246,11 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
     taskDone.push_back(new std::mutex());
     taskDeps.push_back(std::vector<TaskID>(deps));
     taskHandl.push_back(std::pair<IRunnable*, int>(runnable, num_total_tasks));
-    taskWorks.push_back(new std::atomic<int>(num_total_tasks));///+1 indicate non-start state
+    taskWorks.push_back(new std::atomic<int>(num_total_tasks));
+    taskStart.push_back(new std::atomic<bool>(false));///indicate non-start state
     if (taskDeps[taskId].empty()) {
         ///launch task without dependency
-        // taskWorks[taskId] -= 1;
+        taskStart[taskId] = true;
         for (int i = 0; i < num_total_tasks; i++) {
             workQueue.push(Tuple(taskId, taskHandl[taskId].first, i, 
                             taskHandl[taskId].second, taskWorks[taskId], 
@@ -266,7 +268,7 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
         }
         ///if all deps has done(-1), then we can add this task to executing queue
         if (isReady) {
-            // taskWorks[taskId] -= 1;
+            taskStart[taskId] = true;
             for (int i = 0; i < num_total_tasks; i++) {
                 workQueue.push(Tuple(taskId, taskHandl[taskId].first, i, 
                                 taskHandl[taskId].second, taskWorks[taskId], 
@@ -297,6 +299,7 @@ void TaskSystemParallelThreadPoolSleeping::sync() {
         if (threadCounter.load() == 0) break;
     }
     for (int i = 0; i < taskWorks.size(); ++i) {
+        delete taskStart[i];
         delete taskDone[i];
         delete taskWorks[i];
     }
